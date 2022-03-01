@@ -13,5 +13,6 @@ module.exports = {
     quotes: ["error", "double"],
     indent: ["error", 2],
     "no-multi-spaces": ["error"],
+    "import/prefer-default-export": ["off"],
   },
 };

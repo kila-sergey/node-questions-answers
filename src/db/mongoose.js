@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const { CONNECTION_URL } = require("../constants/db");
+import mongoose from "mongoose";
+import { CONNECTION_URL } from "../constants/db";
 
 mongoose.connect(CONNECTION_URL, {
   autoIndex: true,
