@@ -1,3 +1,7 @@
+const OFF = 0;
+const WARN = 1;
+const ERROR = 2;
+
 module.exports = {
   env: {
     browser: true,
@@ -11,8 +15,10 @@ module.exports = {
   },
   rules: {
     quotes: ["error", "double"],
-    indent: ["error", 2],
+    indent: ["error", ERROR],
     "no-multi-spaces": ["error"],
     "import/prefer-default-export": ["off"],
+    "func-names": OFF,
+    "no-underscore-dangle": ["error", { allow: ["_id"] }],
   },
 };

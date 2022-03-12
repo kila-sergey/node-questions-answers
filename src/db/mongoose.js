@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import { CONNECTION_URL } from "../constants/db";
 
-mongoose.connect(CONNECTION_URL, {
+mongoose.connect(process.env.DB_URL, {
   autoIndex: true,
 });

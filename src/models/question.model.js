@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { QUESTION_MODEL_NAME, USER_MODEL_NAME } from "../constants/models";
+import { QUESTION_MODEL_NAME, USER_MODEL_NAME } from "../constants/models.constants";
 
 const questionSchema = new mongoose.Schema({
   rating: {

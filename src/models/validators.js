@@ -2,21 +2,21 @@ import validate from "mongoose-validator";
 
 export const emailValidator = [
   validate({
-    validator: "isEmail",
-    message: "Email is not valid",
-  }),
-  validate({
     validator(val) {
-      return val.length === 0;
+      return val.length !== 0;
     },
     message: "Email is empty",
+  }),
+  validate({
+    validator: "isEmail",
+    message: "Email is not valid",
   }),
 ];
 
 export const passwordValidator = [
   validate({
     validator(val) {
-      return val.length === 0;
+      return val.length !== 0;
     },
     message: "Password is empty",
   }),
