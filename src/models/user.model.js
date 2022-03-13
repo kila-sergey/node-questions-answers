@@ -11,6 +11,7 @@ import {
   PASSWORD_HASH_SALT_ROUNDS,
 } from "../constants/models.constants";
 import { emailValidator, passwordValidator } from "./validators";
+import { BadRequestError, AuthError } from "../utils/error.utils";
 
 const userSchema = new mongoose.Schema(
   {
@@ -67,6 +68,22 @@ userSchema.methods.generateJwtToken = async function () {
   await user.save();
 
   return token;
+};
+
+userSchema.statics.findByCredentials = async function (email, password) {
+  const user = this;
+  if (!email || !password) {
+    throw new BadRequestError("Email and password are required");
+  }
+  const searchedUser = await user.findOne({ email });
+  if (!searchedUser) {
+    throw new AuthError("User with this email doesn't exist");
+  }
+  const isPasswordsMatched = await bcrypt.compare(password, searchedUser.password);
+  if (!isPasswordsMatched) {
+    throw new AuthError("Incorrect password");
+  }
+  return searchedUser;
 };
 
 userSchema.pre("save", async function () {

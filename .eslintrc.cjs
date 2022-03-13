@@ -20,5 +20,7 @@ module.exports = {
     "import/prefer-default-export": ["off"],
     "func-names": OFF,
     "no-underscore-dangle": ["error", { allow: ["_id"] }],
+    "max-classes-per-file": OFF,
+    "consistent-return": OFF,
   },
 };

@@ -25,4 +25,17 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+router.post("/login", async (req, res) => {
+  const userEmail = req.body.email;
+  const userPassword = req.body.password;
+  try {
+    const user = await User.findByCredentials(userEmail, userPassword);
+    const userPublicData = await user.getPublicData();
+    const token = await user.generateJwtToken();
+    res.send({ ...getHttpResponse(userPublicData, RESPONSE_RESULT.OK), token });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
 export default router;
