@@ -16,4 +16,12 @@ export const USER_MODEL_KEYS = {
   UPDATED_AT: "updatedAt",
 };
 
+export const QUESTION_MODEL_KEYS = {
+  RATING: "rating",
+  TITLE: "title",
+  DESCRIPTION: "description",
+  AUTHOR: "author",
+  TAGS: "tags",
+};
+
 export const USER_MODEL_PRIVATE_KEYS = [USER_MODEL_KEYS.PASSWORD];

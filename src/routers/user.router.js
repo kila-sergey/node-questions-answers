@@ -1,15 +1,13 @@
 import express from "express";
-import {
-  StatusCodes,
-} from "http-status-codes";
-import { RESPONSE_RESULT } from "../constants/routers.contsants";
+import { StatusCodes } from "http-status-codes";
+import { API_PREFIX, RESPONSE_RESULT } from "../constants/routers.contsants";
 import { sendError } from "../utils/error.utils";
 import { getHttpResponse } from "../utils/http.utils";
 import User from "../models/user.model";
 
 const router = express.Router();
 
-router.post("/signup", async (req, res) => {
+router.post(`${API_PREFIX}/register`, async (req, res) => {
   const user = new User(req.body);
   try {
     const token = await user.generateJwtToken();
@@ -25,7 +23,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post(`${API_PREFIX}/login`, async (req, res) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password;
   try {

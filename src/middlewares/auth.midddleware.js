@@ -8,7 +8,7 @@ const authMiddleware = async (req, res, next) => {
       throw new AuthError("Authorization token wasnt't provided");
     }
     const token = req.headers.authorization.replace("Bearer ", "");
-    const decodedToken = await jwt.verify(token, "process.env.JWT_SECRET");
+    const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({ _id: decodedToken._id, tokens: token });
 
     if (!user) {
