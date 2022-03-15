@@ -5,6 +5,7 @@ import {
   USER_MODEL_PRIVATE_KEYS,
   USER_MODEL_KEYS,
   QUESTION_MODEL_KEYS,
+  ANSWER_MODEL_NAME,
 } from "../constants/models.constants";
 
 const questionSchema = new mongoose.Schema(
@@ -23,16 +24,17 @@ const questionSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: USER_MODEL_NAME,
-    },
     tags: [
       {
         type: String,
       },
     ],
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: USER_MODEL_NAME,
+    },
+    answers: [{ type: mongoose.Schema.Types.ObjectId, ref: ANSWER_MODEL_NAME }],
   },
   {
     timestamps: true,

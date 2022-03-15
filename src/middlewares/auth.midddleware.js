@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { sendError, AuthError } from "../utils/error.utils";
+import { sendError, AuthError } from "../controllers/error.controller";
 import User from "../models/user.model";
 
 const authMiddleware = async (req, res, next) => {

@@ -11,7 +11,7 @@ import {
   PASSWORD_HASH_SALT_ROUNDS,
 } from "../constants/models.constants";
 import { emailValidator, passwordValidator } from "./validators";
-import { BadRequestError, AuthError } from "../utils/error.utils";
+import { BadRequestError, AuthError } from "../controllers/error.controller";
 
 const userSchema = new mongoose.Schema(
   {
