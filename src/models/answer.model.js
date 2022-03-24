@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
-import { ANSWER_MODEL_NAME, USER_MODEL_NAME } from "../constants/models.constants";
+import {
+  ANSWER_MODEL_NAME,
+  USER_MODEL_NAME,
+  QUESTION_MODEL_NAME,
+} from "../constants/models.constants";
 
 const answerSchema = new mongoose.Schema(
   {
@@ -16,6 +20,11 @@ const answerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: USER_MODEL_NAME,
+    },
+    questionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: QUESTION_MODEL_NAME,
     },
   },
   {

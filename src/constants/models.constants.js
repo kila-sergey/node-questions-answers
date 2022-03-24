@@ -22,6 +22,19 @@ export const QUESTION_MODEL_KEYS = {
   DESCRIPTION: "description",
   AUTHOR: "author",
   TAGS: "tags",
+  ANSWERS: "answers",
 };
 
-export const USER_MODEL_PRIVATE_KEYS = [USER_MODEL_KEYS.PASSWORD];
+export const ANSWER_MODEL_KEYS = {
+  TEXT: "text",
+  RATING: "rating",
+  AUTHOR: "author",
+  QUESTIONID: "questionId",
+};
+
+export const USER_MODEL_PRIVATE_KEYS = [USER_MODEL_KEYS.PASSWORD, USER_MODEL_KEYS.TOKENS];
+export const USER_MODEL_NOT_POPULATED_KEYS = [
+  ...USER_MODEL_PRIVATE_KEYS,
+  USER_MODEL_KEYS.ANSWERS,
+  USER_MODEL_KEYS.QUESTION,
+];

@@ -1,4 +1,6 @@
 import Question from "../models/question.model";
+import { QUESTION_MODEL_KEYS } from "../constants/models.constants";
+import { getAuthorPopulatedKeys } from "../utils/model.utils";
 
 const getQuestionFilters = (query) => {
   const filters = {};
@@ -17,6 +19,9 @@ export const createQuestion = async (req) => {
 
 export const getAllQuestions = async (req) => {
   const filters = getQuestionFilters(req.query);
-  const questions = await Question.find(filters);
+  const questions = await Question.find(filters)
+    .populate(QUESTION_MODEL_KEYS.ANSWERS)
+    .populate(QUESTION_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
+
   return questions;
 };
