@@ -28,3 +28,7 @@ export const getBadRequestError = (err) => ({
 export const getAuthError = (err) => ({
   error: err.message,
 });
+
+export const getForbiddenError = (err) => ({
+  error: err.message,
+});

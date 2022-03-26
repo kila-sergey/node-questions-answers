@@ -31,7 +31,7 @@ export const getAllQuestions = async (req) => {
 export const getQuestion = async (req) => {
   const { questionId } = req.params;
   if (!questionId) {
-    throw new BadRequestError("questionId is wasn't provided");
+    throw new BadRequestError("questionId wasn't provided");
   }
   const question = await Question
     .findById(questionId)
@@ -42,4 +42,13 @@ export const getQuestion = async (req) => {
     throw new BadRequestError("Question with this id doesn't exist");
   }
   return question;
+};
+
+export const deleteQuestion = async (req) => {
+  const { questionId } = req.params;
+  if (!questionId) {
+    throw new BadRequestError("questionId wasn't provided");
+  }
+
+  await Question.deleteOne({ _id: questionId });
 };
