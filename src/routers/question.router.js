@@ -5,6 +5,7 @@ import { getHttpResponse } from "../utils/http.utils";
 import authMiddleware from "../middlewares/auth.midddleware";
 import {
   getAllQuestions,
+  getQuestion,
   createQuestion,
 } from "../controllers/question.controllers";
 import { sendError } from "../controllers/error.controller";
@@ -26,6 +27,15 @@ router.get(`${API_PREFIX}/questions`, authMiddleware, async (req, res) => {
   try {
     const questions = await getAllQuestions(req);
     res.send(getHttpResponse(questions, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+router.get(`${API_PREFIX}/questions/:questionId`, authMiddleware, async (req, res) => {
+  try {
+    const question = await getQuestion(req);
+    res.send(getHttpResponse(question, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
   }
