@@ -42,7 +42,7 @@ router.post(`${API_PREFIX}/logout`, authMiddleware, async (req, res) => {
   try {
     user.tokens = user.tokens.filter((item) => item !== token);
     await user.save();
-    res.send();
+    res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
   }
@@ -54,7 +54,7 @@ router.post(`${API_PREFIX}/logoutAll`, authMiddleware, async (req, res) => {
   try {
     user.tokens = [];
     await user.save();
-    res.send();
+    res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
   }

@@ -9,6 +9,7 @@ import {
   getQuestion,
   createQuestion,
   deleteQuestion,
+  patchQuestion,
 } from "../controllers/question.controllers";
 import { sendError } from "../controllers/error.controller";
 
@@ -38,6 +39,15 @@ router.get(`${API_PREFIX}/questions/:questionId`, authMiddleware, async (req, re
   try {
     const question = await getQuestion(req);
     res.send(getHttpResponse(question, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+router.patch(`${API_PREFIX}/questions/:questionId`, authMiddleware, protectedQuestionMiddleware, async (req, res) => {
+  try {
+    const updatedQuestion = await patchQuestion(req);
+    res.send(getHttpResponse(updatedQuestion, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
   }

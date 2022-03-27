@@ -25,6 +25,11 @@ export const QUESTION_MODEL_KEYS = {
   ANSWERS: "answers",
 };
 
+export const QUESTION_MODEL_EDITABLE_KEYS = [
+  QUESTION_MODEL_KEYS.TITLE,
+  QUESTION_MODEL_KEYS.DESCRIPTION,
+];
+
 export const ANSWER_MODEL_KEYS = {
   TEXT: "text",
   RATING: "rating",

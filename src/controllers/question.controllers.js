@@ -1,6 +1,6 @@
 import Question from "../models/question.model";
-import { QUESTION_MODEL_KEYS } from "../constants/models.constants";
-import { getAuthorPopulatedKeys } from "../utils/model.utils";
+import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS } from "../constants/models.constants";
+import { getAuthorPopulatedKeys, isAllUpdateParamsAllowed } from "../utils/model.utils";
 import { BadRequestError } from "./error.controller";
 
 const getQuestionFilters = (query) => {
@@ -51,4 +51,30 @@ export const deleteQuestion = async (req) => {
   }
 
   await Question.deleteOne({ _id: questionId });
+};
+
+export const patchQuestion = async (req) => {
+  const updateParams = Object.keys(req.body);
+  if (updateParams.length === 0
+    || !isAllUpdateParamsAllowed(updateParams, QUESTION_MODEL_EDITABLE_KEYS)) {
+    throw new BadRequestError("Invalid update params");
+  }
+
+  const { questionId } = req.params;
+  if (!questionId) {
+    throw new BadRequestError("questionId wasn't provided");
+  }
+
+  const userId = req.user._id;
+  const questionToUpdate = await Question.findOne({ _id: questionId, author: userId });
+  if (!questionToUpdate) {
+    throw new BadRequestError("Question with this id not found");
+  }
+
+  updateParams.forEach((paramKey) => {
+    questionToUpdate[paramKey] = req.body[paramKey];
+  });
+
+  const updatedQuestion = await questionToUpdate.save();
+  return updatedQuestion;
 };
