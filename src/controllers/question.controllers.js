@@ -1,7 +1,8 @@
 import Question from "../models/question.model";
 import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS } from "../constants/models.constants";
 import { getAuthorPopulatedKeys, isAllUpdateParamsAllowed } from "../utils/model.utils";
-import { BadRequestError } from "./error.controller";
+import { BadRequestError, ForbiddenError } from "./error.controller";
+import { QUESTION_PARAMS } from "../constants/routers.contsants";
 
 const getQuestionFilters = (query) => {
   const filters = {};
@@ -15,7 +16,7 @@ export const createQuestion = async (req) => {
   const author = await req.user;
   const question = new Question({ ...req.body, author: author._id });
   const createdQuestion = await question.save();
-  return createdQuestion;
+  return createdQuestion.getPublicData();
 };
 
 export const getAllQuestions = async (req) => {
@@ -27,13 +28,14 @@ export const getAllQuestions = async (req) => {
     .populate(QUESTION_MODEL_KEYS.ANSWERS)
     .populate(QUESTION_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
 
-  return questions;
+  const questonsPromises = questions.map(async (question) => question.getPublicData());
+  return Promise.all(questonsPromises);
 };
 
 export const getQuestion = async (req) => {
-  const { questionId } = req.params;
+  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
   if (!questionId) {
-    throw new BadRequestError("questionId wasn't provided");
+    throw new BadRequestError("Question id wasn't provided");
   }
   const question = await Question
     .findOne({ _id: questionId })
@@ -43,13 +45,13 @@ export const getQuestion = async (req) => {
   if (!question) {
     throw new BadRequestError("Question with this id doesn't exist");
   }
-  return question;
+  return question.getPublicData();
 };
 
 export const deleteQuestion = async (req) => {
-  const { questionId } = req.params;
+  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
   if (!questionId) {
-    throw new BadRequestError("questionId wasn't provided");
+    throw new BadRequestError("Question id wasn't provided");
   }
 
   await Question.deleteOne({ _id: questionId });
@@ -62,7 +64,7 @@ export const patchQuestion = async (req) => {
     throw new BadRequestError("Invalid update params");
   }
 
-  const { questionId } = req.params;
+  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
   const questionToUpdate = await Question.findOne({ _id: questionId });
 
   if (!questionToUpdate) {
@@ -74,5 +76,66 @@ export const patchQuestion = async (req) => {
   });
 
   const updatedQuestion = await questionToUpdate.save();
-  return updatedQuestion;
+  return updatedQuestion.getPublicData();
+};
+
+export const upVoteToQuestion = async (req) => {
+  const userId = req.user._id;
+  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+  const questionToUpVote = await Question.findOne({ _id: questionId });
+  if (!questionToUpVote) {
+    throw new BadRequestError("Question with this id not found");
+  }
+
+  const questionRatingsArray = questionToUpVote[QUESTION_MODEL_KEYS.RATING];
+  const existingUserRating = questionRatingsArray
+    .find((rating) => rating.author._id.toString() === userId.toString());
+
+  if (!existingUserRating) {
+    questionRatingsArray.push({ author: userId, value: 1 });
+    const upVotedQuestion = await questionToUpVote.save();
+    return upVotedQuestion.getPublicData();
+  }
+
+  const { value } = existingUserRating;
+
+  if (value > 0) {
+    throw new ForbiddenError("You have already voted up this question");
+  }
+
+  const existingUserRatingIndex = questionRatingsArray.indexOf(existingUserRating);
+  questionRatingsArray.set(existingUserRatingIndex, { author: userId, value: value + 1 });
+  const upVotedQuestion = await questionToUpVote.save();
+
+  return upVotedQuestion.getPublicData();
+};
+
+export const downVoteToQuestion = async (req) => {
+  const userId = req.user._id;
+  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+  const questionToDownVote = await Question.findOne({ _id: questionId });
+  if (!questionToDownVote) {
+    throw new BadRequestError("Question with this id not found");
+  }
+
+  const questionRatingsArray = questionToDownVote[QUESTION_MODEL_KEYS.RATING];
+  const existingUserRating = questionRatingsArray
+    .find((rating) => rating.author._id.toString() === userId.toString());
+
+  if (!existingUserRating) {
+    questionRatingsArray.push({ author: userId, value: -1 });
+    const downVotedQuestion = await questionToDownVote.save();
+    return downVotedQuestion.getPublicData();
+  }
+
+  const { value } = existingUserRating;
+  if (value < 0) {
+    throw new ForbiddenError("You have already voted down this question");
+  }
+
+  const existingUserRatingIndexIndex = questionRatingsArray.indexOf(existingUserRating);
+  questionRatingsArray.set(existingUserRatingIndexIndex, { author: userId, value: value - 1 });
+  const downVotedQuestion = await questionToDownVote.save();
+
+  return downVotedQuestion.getPublicData();
 };

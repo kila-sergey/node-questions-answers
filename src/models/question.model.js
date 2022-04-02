@@ -3,14 +3,13 @@ import {
   QUESTION_MODEL_NAME,
   USER_MODEL_NAME,
   ANSWER_MODEL_NAME,
+  QUESTION_MODEL_KEYS,
 } from "../constants/models.constants";
+import ratingSchema from "./ratingSchema";
 
 const questionSchema = new mongoose.Schema(
   {
-    rating: {
-      type: Number,
-      default: 0,
-    },
+    rating: [ratingSchema],
     title: {
       type: String,
       required: true,
@@ -37,6 +36,15 @@ const questionSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+questionSchema.methods.getPublicData = async function () {
+  const question = this;
+  const questionObject = question.toObject();
+  questionObject[QUESTION_MODEL_KEYS.RATING] = questionObject[QUESTION_MODEL_KEYS.RATING]
+    .reduce((acc, item) => acc + item.value, 0);
+
+  return questionObject;
+};
 
 const Question = mongoose.model(QUESTION_MODEL_NAME, questionSchema);
 

@@ -1,10 +1,11 @@
 import { sendError, BadRequestError, ForbiddenError } from "../controllers/error.controller";
 import Question from "../models/question.model";
+import { QUESTION_PARAMS } from "../constants/routers.contsants";
 
 const protectedQuestionMiddleware = async (req, res, next) => {
   try {
     const { user } = req;
-    const { questionId } = req.params;
+    const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
 
     if (!questionId) {
       throw new BadRequestError("Question id wasn't provided");

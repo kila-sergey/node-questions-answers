@@ -1,6 +1,6 @@
 import express from "express";
 import { StatusCodes } from "http-status-codes";
-import { API_PREFIX, RESPONSE_RESULT } from "../constants/routers.contsants";
+import { API_PREFIX, RESPONSE_RESULT, QUESTION_PARAMS } from "../constants/routers.contsants";
 import { getHttpResponse } from "../utils/http.utils";
 import authMiddleware from "../middlewares/auth.midddleware";
 import protectedQuestionMiddleware from "../middlewares/protectedQuestion.middleware";
@@ -10,6 +10,8 @@ import {
   createQuestion,
   deleteQuestion,
   patchQuestion,
+  upVoteToQuestion,
+  downVoteToQuestion,
 } from "../controllers/question.controllers";
 import { sendError } from "../controllers/error.controller";
 
@@ -36,7 +38,7 @@ router.get(`${API_PREFIX}/questions`, authMiddleware, async (req, res) => {
 });
 
 router.get(
-  `${API_PREFIX}/questions/:questionId`,
+  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
   authMiddleware,
   async (req, res) => {
     try {
@@ -49,7 +51,7 @@ router.get(
 );
 
 router.patch(
-  `${API_PREFIX}/questions/:questionId`,
+  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
   authMiddleware,
   protectedQuestionMiddleware,
   async (req, res) => {
@@ -63,7 +65,7 @@ router.patch(
 );
 
 router.delete(
-  `${API_PREFIX}/questions/:questionId`,
+  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
   authMiddleware,
   protectedQuestionMiddleware,
   async (req, res) => {
@@ -76,4 +78,21 @@ router.delete(
   },
 );
 
+router.post(`${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/upvote`, authMiddleware, async (req, res) => {
+  try {
+    const upVotedQuestion = await upVoteToQuestion(req);
+    res.send(getHttpResponse(upVotedQuestion, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+router.post(`${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/downvote`, authMiddleware, async (req, res) => {
+  try {
+    const downVotedQuestion = await downVoteToQuestion(req);
+    res.send(getHttpResponse(downVotedQuestion, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
 export default router;
