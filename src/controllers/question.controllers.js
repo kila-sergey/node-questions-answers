@@ -21,7 +21,9 @@ export const createQuestion = async (req) => {
 export const getAllQuestions = async (req) => {
   const filters = getQuestionFilters(req.query);
   const questions = await Question
-    .find(filters)
+    .find({
+      ...filters,
+    })
     .populate(QUESTION_MODEL_KEYS.ANSWERS)
     .populate(QUESTION_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
 
@@ -34,7 +36,7 @@ export const getQuestion = async (req) => {
     throw new BadRequestError("questionId wasn't provided");
   }
   const question = await Question
-    .findById(questionId)
+    .findOne({ _id: questionId })
     .populate(QUESTION_MODEL_KEYS.ANSWERS)
     .populate(QUESTION_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
 
@@ -61,12 +63,8 @@ export const patchQuestion = async (req) => {
   }
 
   const { questionId } = req.params;
-  if (!questionId) {
-    throw new BadRequestError("questionId wasn't provided");
-  }
+  const questionToUpdate = await Question.findOne({ _id: questionId });
 
-  const userId = req.user._id;
-  const questionToUpdate = await Question.findOne({ _id: questionId, author: userId });
   if (!questionToUpdate) {
     throw new BadRequestError("Question with this id not found");
   }

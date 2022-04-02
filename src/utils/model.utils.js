@@ -15,4 +15,3 @@ export const getAuthorPopulatedKeys = () => {
 
 export const isAllUpdateParamsAllowed = (updatedParams, allowedParams) => updatedParams
   .every((updatedParam) => allowedParams.includes(updatedParam));
-

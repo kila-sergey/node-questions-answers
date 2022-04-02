@@ -7,7 +7,7 @@ const protectedQuestionMiddleware = async (req, res, next) => {
     const { questionId } = req.params;
 
     if (!questionId) {
-      throw new BadRequestError("questionId is wasn't provided");
+      throw new BadRequestError("Question id wasn't provided");
     }
     const question = await Question.findById(questionId);
 
@@ -18,7 +18,7 @@ const protectedQuestionMiddleware = async (req, res, next) => {
     const questionAuthorId = question.author.toString();
     const isAccessAllowed = user.isAdmin || user._id.toString() === questionAuthorId;
     if (!isAccessAllowed) {
-      throw new ForbiddenError("Only admin and question author can edit this question");
+      throw new ForbiddenError("Only admin and author has access to this question");
     }
 
     next();

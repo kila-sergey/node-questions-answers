@@ -5,7 +5,7 @@ import User from "../models/user.model";
 const authMiddleware = async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
-      throw new AuthError("Authorization token wasnt't provided");
+      throw new AuthError("Authorization token wasn't provided");
     }
     const token = req.headers.authorization.replace("Bearer ", "");
     const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
