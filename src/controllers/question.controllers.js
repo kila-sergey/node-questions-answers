@@ -1,6 +1,6 @@
 import Question from "../models/question.model";
 import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS } from "../constants/models.constants";
-import { getAuthorPopulatedKeys, isAllUpdateParamsAllowed } from "../utils/model.utils";
+import { isAllUpdateParamsAllowed } from "../utils/model.utils";
 import { BadRequestError, ForbiddenError } from "./error.controller";
 import { QUESTION_PARAMS } from "../constants/routers.constants";
 import { VOTING_TYPE } from "../constants/other.constants";
@@ -27,26 +27,20 @@ export const getAllQuestions = async (req) => {
       ...filters,
     });
 
-  const questonsPromises = questions.map(async (question) => question.getPublicData());
-  return Promise.all(questonsPromises);
+  const questionsPromises = questions.map(async (question) => question.getPublicData());
+  return Promise.all(questionsPromises);
 };
 
 export const getQuestion = async (req) => {
   const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
-  if (!questionId) {
-    throw new BadRequestError("Question id wasn't provided");
-  }
   const question = await Question
-    .findOne({ _id: questionId });
-
-  if (!question) {
-    throw new BadRequestError("Question with this id doesn't exist");
-  }
+    .findQuestionById(questionId);
   return question.getPublicData();
 };
 
 export const deleteQuestion = async (req) => {
   const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+
   if (!questionId) {
     throw new BadRequestError("Question id wasn't provided");
   }
@@ -62,11 +56,7 @@ export const patchQuestion = async (req) => {
   }
 
   const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
-  const questionToUpdate = await Question.findOne({ _id: questionId });
-
-  if (!questionToUpdate) {
-    throw new BadRequestError("Question with this id not found");
-  }
+  const questionToUpdate = await Question.findQuestionById(questionId);
 
   updateParams.forEach((paramKey) => {
     questionToUpdate[paramKey] = req.body[paramKey];
@@ -79,10 +69,7 @@ export const patchQuestion = async (req) => {
 export const voteToQuestion = async (req, type) => {
   const userId = req.user._id;
   const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
-  const questionToVote = await Question.findOne({ _id: questionId });
-  if (!questionToVote) {
-    throw new BadRequestError("Question with this id not found");
-  }
+  const questionToVote = await Question.findQuestionById(questionId);
 
   const questionRatingsArray = questionToVote[QUESTION_MODEL_KEYS.RATING];
   const existingUserRating = questionRatingsArray
@@ -111,4 +98,54 @@ export const voteToQuestion = async (req, type) => {
   const votedQuestion = await questionToVote.save();
 
   return votedQuestion.getPublicData();
+};
+
+export const createQuestionTag = async (req) => {
+  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+  const question = await Question
+    .findQuestionById(questionId);
+
+  const { name } = req.body;
+  if (!name) {
+    throw new BadRequestError("Tag wasn't provided");
+  }
+
+  question[QUESTION_MODEL_KEYS.TAGS].push(req.body);
+  const newQuestion = await question.save();
+  return newQuestion.getPublicData();
+};
+
+export const deleteQuestionTag = async (req) => {
+  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+  const tagId = req.params[QUESTION_PARAMS.TAG_ID];
+  const question = await Question
+    .findQuestionById(questionId);
+
+  const questionTag = await question.getTag(tagId);
+
+  question[QUESTION_MODEL_KEYS.TAGS].id(questionTag._id).remove();
+  const newQuestion = await question.save();
+
+  return newQuestion;
+};
+
+export const updateQuestionTag = async (req) => {
+  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+  const tagId = req.params[QUESTION_PARAMS.TAG_ID];
+  const question = await Question
+    .findQuestionById(questionId);
+
+  const questionTag = await question.getTag(tagId);
+  const questionTagIndex = question[QUESTION_MODEL_KEYS.TAGS].indexOf(questionTag);
+
+  question[QUESTION_MODEL_KEYS.TAGS].set(
+    questionTagIndex,
+    {
+      _id: questionTag._id,
+      ...req.body,
+    },
+  );
+
+  const newQuestion = await question.save();
+  return newQuestion;
 };

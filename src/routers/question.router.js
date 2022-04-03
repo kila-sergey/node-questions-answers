@@ -5,6 +5,7 @@ import { VOTING_TYPE } from "../constants/other.constants";
 import { getHttpResponse } from "../utils/http.utils";
 import authMiddleware from "../middlewares/auth.midddleware";
 import protectedQuestionMiddleware from "../middlewares/protectedQuestion.middleware";
+import protectedStrictQuestionMiddleware from "../middlewares/protectedStrictQuestion.middleware";
 import {
   getAllQuestions,
   getQuestion,
@@ -12,6 +13,9 @@ import {
   deleteQuestion,
   patchQuestion,
   voteToQuestion,
+  createQuestionTag,
+  deleteQuestionTag,
+  updateQuestionTag,
 } from "../controllers/question.controllers";
 import { sendError } from "../controllers/error.controller";
 
@@ -95,4 +99,32 @@ router.post(`${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/downvote`, 
     sendError(res, err);
   }
 });
+
+router.post(`${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags`, authMiddleware, protectedStrictQuestionMiddleware, async (req, res) => {
+  try {
+    const question = await createQuestionTag(req);
+    res.status(StatusCodes.CREATED).send(getHttpResponse(question, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+router.delete(`${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags/:${QUESTION_PARAMS.TAG_ID}`, authMiddleware, protectedStrictQuestionMiddleware, async (req, res) => {
+  try {
+    const question = await deleteQuestionTag(req);
+    res.send(getHttpResponse(question, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+router.put(`${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags/:${QUESTION_PARAMS.TAG_ID}`, authMiddleware, protectedStrictQuestionMiddleware, async (req, res) => {
+  try {
+    const question = await updateQuestionTag(req);
+    res.send(getHttpResponse(question, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
 export default router;
