@@ -1,3 +1,4 @@
+import { ANSWER_PARAMS } from "../constants/routers.contsants";
 import {
   sendError,
   BadRequestError,
@@ -8,7 +9,7 @@ import Answer from "../models/answer.model";
 const protectedQuestionMiddleware = async (req, res, next) => {
   try {
     const { user } = req;
-    const { answerId } = req.params;
+    const answerId = req.params[ANSWER_PARAMS.ANSWER_ID];
 
     if (!answerId) {
       throw new BadRequestError("Answer id wasn't provided");

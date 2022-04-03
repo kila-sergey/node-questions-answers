@@ -3,7 +3,9 @@ import {
   ANSWER_MODEL_NAME,
   USER_MODEL_NAME,
   QUESTION_MODEL_NAME,
+  ANSWER_MODEL_KEYS,
 } from "../constants/models.constants";
+import ratingSchema from "./ratingSchema";
 
 const answerSchema = new mongoose.Schema(
   {
@@ -12,10 +14,7 @@ const answerSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    rating: {
-      type: Number,
-      default: 0,
-    },
+    rating: [ratingSchema],
     author: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -31,6 +30,15 @@ const answerSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+answerSchema.methods.getPublicData = async function () {
+  const answer = this;
+  const answerObject = answer.toObject();
+  answerObject[ANSWER_MODEL_KEYS.RATING] = answerObject[ANSWER_MODEL_KEYS.RATING]
+    .reduce((acc, item) => acc + item.value, 0);
+
+  return answerObject;
+};
 
 const Answer = mongoose.model(ANSWER_MODEL_NAME, answerSchema);
 
