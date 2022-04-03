@@ -1,6 +1,6 @@
 import express from "express";
 import { StatusCodes } from "http-status-codes";
-import { API_PREFIX, RESPONSE_RESULT } from "../constants/routers.contsants";
+import { API_PREFIX, RESPONSE_RESULT } from "../constants/routers.constants";
 import { getHttpResponse } from "../utils/http.utils";
 import { sendError } from "../controllers/error.controller";
 import User from "../models/user.model";

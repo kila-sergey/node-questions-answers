@@ -1,4 +1,4 @@
-import { ANSWER_PARAMS } from "../constants/routers.contsants";
+import { ANSWER_PARAMS } from "../constants/routers.constants";
 import {
   sendError,
   BadRequestError,

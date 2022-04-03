@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { getAuthorPopulatedKeys } from "../utils/model.utils";
+
 import {
   QUESTION_MODEL_NAME,
   USER_MODEL_NAME,
@@ -37,9 +39,20 @@ const questionSchema = new mongoose.Schema(
   },
 );
 
+function autoPopulate(next) {
+  this.populate(QUESTION_MODEL_KEYS.ANSWERS)
+    .populate(QUESTION_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
+  next();
+}
+
+questionSchema
+  .pre("findOne", autoPopulate)
+  .pre("find", autoPopulate);
+
 questionSchema.methods.getPublicData = async function () {
   const question = this;
   const questionObject = question.toObject();
+
   questionObject[QUESTION_MODEL_KEYS.RATING] = questionObject[QUESTION_MODEL_KEYS.RATING]
     .reduce((acc, item) => acc + item.value, 0);
 

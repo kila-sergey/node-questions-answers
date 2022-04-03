@@ -2,7 +2,8 @@ import Question from "../models/question.model";
 import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS } from "../constants/models.constants";
 import { getAuthorPopulatedKeys, isAllUpdateParamsAllowed } from "../utils/model.utils";
 import { BadRequestError, ForbiddenError } from "./error.controller";
-import { QUESTION_PARAMS } from "../constants/routers.contsants";
+import { QUESTION_PARAMS } from "../constants/routers.constants";
+import { VOTING_TYPE } from "../constants/other.constants";
 
 const getQuestionFilters = (query) => {
   const filters = {};
@@ -24,9 +25,7 @@ export const getAllQuestions = async (req) => {
   const questions = await Question
     .find({
       ...filters,
-    })
-    .populate(QUESTION_MODEL_KEYS.ANSWERS)
-    .populate(QUESTION_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
+    });
 
   const questonsPromises = questions.map(async (question) => question.getPublicData());
   return Promise.all(questonsPromises);
@@ -38,9 +37,7 @@ export const getQuestion = async (req) => {
     throw new BadRequestError("Question id wasn't provided");
   }
   const question = await Question
-    .findOne({ _id: questionId })
-    .populate(QUESTION_MODEL_KEYS.ANSWERS)
-    .populate(QUESTION_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
+    .findOne({ _id: questionId });
 
   if (!question) {
     throw new BadRequestError("Question with this id doesn't exist");
@@ -79,63 +76,39 @@ export const patchQuestion = async (req) => {
   return updatedQuestion.getPublicData();
 };
 
-export const upVoteToQuestion = async (req) => {
+export const voteToQuestion = async (req, type) => {
   const userId = req.user._id;
   const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
-  const questionToUpVote = await Question.findOne({ _id: questionId });
-  if (!questionToUpVote) {
+  const questionToVote = await Question.findOne({ _id: questionId });
+  if (!questionToVote) {
     throw new BadRequestError("Question with this id not found");
   }
 
-  const questionRatingsArray = questionToUpVote[QUESTION_MODEL_KEYS.RATING];
+  const questionRatingsArray = questionToVote[QUESTION_MODEL_KEYS.RATING];
   const existingUserRating = questionRatingsArray
     .find((rating) => rating.author._id.toString() === userId.toString());
 
   if (!existingUserRating) {
-    questionRatingsArray.push({ author: userId, value: 1 });
-    const upVotedQuestion = await questionToUpVote.save();
-    return upVotedQuestion.getPublicData();
+    questionRatingsArray.push({ author: userId, value: type === VOTING_TYPE.UP ? 1 : -1 });
+    const votedQuestion = await questionToVote.save();
+    return votedQuestion.getPublicData();
   }
 
   const { value } = existingUserRating;
 
-  if (value > 0) {
+  if (type === VOTING_TYPE.UP && value > 0) {
     throw new ForbiddenError("You have already voted up this question");
   }
-
-  const existingUserRatingIndex = questionRatingsArray.indexOf(existingUserRating);
-  questionRatingsArray.set(existingUserRatingIndex, { author: userId, value: value + 1 });
-  const upVotedQuestion = await questionToUpVote.save();
-
-  return upVotedQuestion.getPublicData();
-};
-
-export const downVoteToQuestion = async (req) => {
-  const userId = req.user._id;
-  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
-  const questionToDownVote = await Question.findOne({ _id: questionId });
-  if (!questionToDownVote) {
-    throw new BadRequestError("Question with this id not found");
-  }
-
-  const questionRatingsArray = questionToDownVote[QUESTION_MODEL_KEYS.RATING];
-  const existingUserRating = questionRatingsArray
-    .find((rating) => rating.author._id.toString() === userId.toString());
-
-  if (!existingUserRating) {
-    questionRatingsArray.push({ author: userId, value: -1 });
-    const downVotedQuestion = await questionToDownVote.save();
-    return downVotedQuestion.getPublicData();
-  }
-
-  const { value } = existingUserRating;
-  if (value < 0) {
+  if (type === VOTING_TYPE.DOWN && value < 0) {
     throw new ForbiddenError("You have already voted down this question");
   }
 
-  const existingUserRatingIndexIndex = questionRatingsArray.indexOf(existingUserRating);
-  questionRatingsArray.set(existingUserRatingIndexIndex, { author: userId, value: value - 1 });
-  const downVotedQuestion = await questionToDownVote.save();
+  const existingUserRatingIndex = questionRatingsArray.indexOf(existingUserRating);
+  questionRatingsArray.set(
+    existingUserRatingIndex,
+    { author: userId, value: type === VOTING_TYPE.UP ? value + 1 : value - 1 },
+  );
+  const votedQuestion = await questionToVote.save();
 
-  return downVotedQuestion.getPublicData();
+  return votedQuestion.getPublicData();
 };

@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { getHttpResponse } from "../utils/http.utils";
-import { RESPONSE_RESULT } from "../constants/routers.contsants";
+import { RESPONSE_RESULT } from "../constants/routers.constants";
 import {
   getValidationError,
   getMongoError,

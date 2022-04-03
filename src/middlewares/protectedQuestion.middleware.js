@@ -1,6 +1,6 @@
 import { sendError, BadRequestError, ForbiddenError } from "../controllers/error.controller";
 import Question from "../models/question.model";
-import { QUESTION_PARAMS } from "../constants/routers.contsants";
+import { QUESTION_PARAMS } from "../constants/routers.constants";
 
 const protectedQuestionMiddleware = async (req, res, next) => {
   try {
