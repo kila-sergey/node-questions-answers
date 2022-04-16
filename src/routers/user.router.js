@@ -3,20 +3,19 @@ import { StatusCodes } from "http-status-codes";
 import { API_PREFIX, RESPONSE_RESULT } from "../constants/routers.constants";
 import { getHttpResponse } from "../utils/http.utils";
 import { sendError } from "../controllers/error.controller";
-import User from "../models/user.model";
 import authMiddleware from "../middlewares/auth.midddleware";
+import {
+  userRegister, userLogin, userLogout, userLogoutAll,
+} from "../controllers/user.controller";
 
 const router = express.Router();
 
 router.post(`${API_PREFIX}/register`, async (req, res) => {
-  const user = new User(req.body);
   try {
-    const token = await user.generateJwtToken();
-    const createdUser = await user.save();
-    const userPublicDta = await createdUser.getPublicData();
+    const { userPublicData, token } = await userRegister(req);
 
     res.status(StatusCodes.CREATED).send({
-      ...getHttpResponse(userPublicDta, RESPONSE_RESULT.OK),
+      ...getHttpResponse(userPublicData, RESPONSE_RESULT.OK),
       token,
     });
   } catch (err) {
@@ -25,11 +24,8 @@ router.post(`${API_PREFIX}/register`, async (req, res) => {
 });
 
 router.post(`${API_PREFIX}/login`, async (req, res) => {
-  const { email, password } = req.body;
   try {
-    const user = await User.findByCredentials(email, password);
-    const userPublicData = await user.getPublicData();
-    const token = await user.generateJwtToken();
+    const { userPublicData, token } = await userLogin(req);
     res.send({ ...getHttpResponse(userPublicData, RESPONSE_RESULT.OK), token });
   } catch (err) {
     sendError(res, err);
@@ -37,11 +33,8 @@ router.post(`${API_PREFIX}/login`, async (req, res) => {
 });
 
 router.post(`${API_PREFIX}/logout`, authMiddleware, async (req, res) => {
-  const { user, token } = req;
-
   try {
-    user.tokens = user.tokens.filter((item) => item !== token);
-    await user.save();
+    await userLogout(req);
     res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
@@ -49,11 +42,8 @@ router.post(`${API_PREFIX}/logout`, authMiddleware, async (req, res) => {
 });
 
 router.post(`${API_PREFIX}/logoutAll`, authMiddleware, async (req, res) => {
-  const { user } = req;
-
   try {
-    user.tokens = [];
-    await user.save();
+    await userLogoutAll(req);
     res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
