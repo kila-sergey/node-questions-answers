@@ -1,7 +1,9 @@
 import Answer from "../models/answer.model";
 import Question from "../models/question.model";
 import { BadRequestError, ForbiddenError } from "./error.controller";
-import { ANSWER_MODEL_EDITABLE_KEYS, ANSWER_MODEL_KEYS } from "../constants/models.constants";
+import {
+  ANSWER_MODEL_EDITABLE_KEYS, ANSWER_MODEL_KEYS, USER_MODEL_KEYS, QUESTION_MODEL_KEYS,
+} from "../constants/models.constants";
 import { ANSWER_PARAMS } from "../constants/routers.constants";
 import { VOTING_TYPE } from "../constants/other.constants";
 import { isAllUpdateParamsAllowed } from "../utils/model.utils";
@@ -9,7 +11,6 @@ import { isAllUpdateParamsAllowed } from "../utils/model.utils";
 export const createAnswer = async (req) => {
   const author = req.user;
   const relatedQuestion = await Question.findOne({ _id: req.body.questionId });
-
   if (!relatedQuestion) {
     throw new BadRequestError("Question with this id doesn't exist");
   }
@@ -17,9 +18,11 @@ export const createAnswer = async (req) => {
   const answer = new Answer({ ...req.body, author: author._id });
   const createdAnswer = await answer.save();
 
-  relatedQuestion.answers = [...relatedQuestion.answers, createdAnswer._id];
-
+  relatedQuestion[QUESTION_MODEL_KEYS.ANSWERS].push(createdAnswer._id);
   await relatedQuestion.save();
+
+  author[USER_MODEL_KEYS.ANSWERS].push(createdAnswer._id);
+  await author.save();
 
   return createdAnswer.getPublicData();
 };

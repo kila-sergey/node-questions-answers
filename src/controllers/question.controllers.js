@@ -1,5 +1,5 @@
 import Question from "../models/question.model";
-import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS } from "../constants/models.constants";
+import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS, USER_MODEL_KEYS } from "../constants/models.constants";
 import { isAllUpdateParamsAllowed } from "../utils/model.utils";
 import { BadRequestError, ForbiddenError } from "./error.controller";
 import { QUESTION_PARAMS } from "../constants/routers.constants";
@@ -17,6 +17,10 @@ export const createQuestion = async (req) => {
   const author = await req.user;
   const question = new Question({ ...req.body, author: author._id });
   const createdQuestion = await question.save();
+
+  author[USER_MODEL_KEYS.QUESTIONS].push(createdQuestion._id);
+  await author.save();
+
   return createdQuestion.getPublicData();
 };
 

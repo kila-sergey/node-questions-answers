@@ -64,6 +64,11 @@ questionSchema.methods.getPublicData = async function () {
   questionObject[QUESTION_MODEL_KEYS.RATING] = questionObject[QUESTION_MODEL_KEYS.RATING]
     .reduce((acc, item) => acc + item.value, 0);
 
+  const questionsAnswersPromises = question[QUESTION_MODEL_KEYS.ANSWERS]
+    .map(async (answer) => answer.getPublicData());
+  const questionsAnswers = await Promise.all(questionsAnswersPromises);
+  questionObject[QUESTION_MODEL_KEYS.ANSWERS] = questionsAnswers;
+
   return questionObject;
 };
 

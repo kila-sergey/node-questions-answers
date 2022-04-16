@@ -10,7 +10,7 @@ export const USER_MODEL_KEYS = {
   PASSWORD: "password",
   IS_ADMIN: "isAdmin",
   ANSWERS: "answers",
-  QUESTION: "questions",
+  QUESTIONS: "questions",
   TOKENS: "tokens",
   CREATED_AT: "createdAt",
   UPDATED_AT: "updatedAt",
@@ -34,7 +34,7 @@ export const ANSWER_MODEL_KEYS = {
   TEXT: "text",
   RATING: "rating",
   AUTHOR: "author",
-  QUESTIONID: "questionId",
+  QUESTION_ID: "questionId",
 };
 
 export const ANSWER_MODEL_EDITABLE_KEYS = [ANSWER_MODEL_KEYS.TEXT];

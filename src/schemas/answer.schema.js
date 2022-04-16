@@ -4,6 +4,7 @@ import {
   QUESTION_MODEL_NAME,
   ANSWER_MODEL_KEYS,
 } from "../constants/models.constants";
+import { getAuthorPopulatedKeys } from "../utils/model.utils";
 import ratingSchema from "./rating.schema";
 
 const answerSchema = new mongoose.Schema(
@@ -30,11 +31,21 @@ const answerSchema = new mongoose.Schema(
   },
 );
 
+function autoPopulate(next) {
+  this.populate(ANSWER_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
+  next();
+}
+
+answerSchema
+  .pre("findOne", autoPopulate)
+  .pre("find", autoPopulate);
+
 answerSchema.methods.getPublicData = async function () {
   const answer = this;
   const answerObject = answer.toObject();
-  answerObject[ANSWER_MODEL_KEYS.RATING] = answerObject[ANSWER_MODEL_KEYS.RATING]
-    .reduce((acc, item) => acc + item.value, 0);
+  answerObject[ANSWER_MODEL_KEYS.RATING] = answerObject[
+    ANSWER_MODEL_KEYS.RATING
+  ].reduce((acc, item) => acc + item.value, 0);
 
   return answerObject;
 };
