@@ -36,16 +36,6 @@ const questionSchema = new mongoose.Schema(
   },
 );
 
-function autoPopulate(next) {
-  this.populate(QUESTION_MODEL_KEYS.ANSWERS)
-    .populate(QUESTION_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
-  next();
-}
-
-questionSchema
-  .pre("findOne", autoPopulate)
-  .pre("find", autoPopulate);
-
 questionSchema.statics.findQuestionById = async function (id) {
   const question = await this
     .findOne({ _id: id });
@@ -59,12 +49,17 @@ questionSchema.statics.findQuestionById = async function (id) {
 
 questionSchema.methods.getPublicData = async function () {
   const question = this;
-  const questionObject = question.toObject();
+  const populatedQuestion = await question.populate([
+    { path: QUESTION_MODEL_KEYS.ANSWERS },
+    { path: QUESTION_MODEL_KEYS.AUTHOR, select: getAuthorPopulatedKeys() }]);
+
+  const questionObject = populatedQuestion.toObject();
 
   questionObject[QUESTION_MODEL_KEYS.RATING] = questionObject[QUESTION_MODEL_KEYS.RATING]
     .reduce((acc, item) => acc + item.value, 0);
 
-  const questionsAnswersPromises = question[QUESTION_MODEL_KEYS.ANSWERS]
+  // Get public data for answers
+  const questionsAnswersPromises = populatedQuestion[QUESTION_MODEL_KEYS.ANSWERS]
     .map(async (answer) => answer.getPublicData());
   const questionsAnswers = await Promise.all(questionsAnswersPromises);
   questionObject[QUESTION_MODEL_KEYS.ANSWERS] = questionsAnswers;

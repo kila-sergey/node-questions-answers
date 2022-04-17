@@ -31,18 +31,14 @@ const answerSchema = new mongoose.Schema(
   },
 );
 
-function autoPopulate(next) {
-  this.populate(ANSWER_MODEL_KEYS.AUTHOR, getAuthorPopulatedKeys());
-  next();
-}
-
-answerSchema
-  .pre("findOne", autoPopulate)
-  .pre("find", autoPopulate);
-
 answerSchema.methods.getPublicData = async function () {
   const answer = this;
-  const answerObject = answer.toObject();
+  const populatedAnswer = await answer.populate({
+    path: ANSWER_MODEL_KEYS.AUTHOR,
+    select: getAuthorPopulatedKeys(),
+  });
+
+  const answerObject = populatedAnswer.toObject();
   answerObject[ANSWER_MODEL_KEYS.RATING] = answerObject[
     ANSWER_MODEL_KEYS.RATING
   ].reduce((acc, item) => acc + item.value, 0);

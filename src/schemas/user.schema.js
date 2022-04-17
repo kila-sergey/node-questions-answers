@@ -47,13 +47,37 @@ const userSchema = new mongoose.Schema(
   },
 );
 
+async function hashPassword(next) {
+  const user = this;
+  if (user.isModified(USER_MODEL_KEYS.PASSWORD)) {
+    user.password = await bcrypt.hash(user.password, PASSWORD_HASH_SALT_ROUNDS);
+  }
+  next();
+}
+
 userSchema.methods.getPublicData = async function () {
   const user = this;
-  const userObject = user.toObject();
+
+  const populatedUser = await user
+    .populate([{ path: USER_MODEL_KEYS.QUESTIONS }, { path: USER_MODEL_KEYS.ANSWERS }]);
+
+  const userObject = populatedUser.toObject();
 
   USER_MODEL_PRIVATE_KEYS.forEach((privateKey) => {
     delete userObject[privateKey];
   });
+
+  // Get public data for answers
+  const userAnswersPromises = populatedUser[USER_MODEL_KEYS.ANSWERS]
+    .map(async (answer) => answer.getPublicData());
+  const userAnswersPublicData = await Promise.all(userAnswersPromises);
+  userObject[USER_MODEL_KEYS.ANSWERS] = userAnswersPublicData;
+
+  // Get public data for questions
+  const userQuestionsPromises = populatedUser[USER_MODEL_KEYS.QUESTIONS]
+    .map(async (question) => question.getPublicData());
+  const userQuestionsPublicData = await Promise.all(userQuestionsPromises);
+  userObject[USER_MODEL_KEYS.QUESTIONS] = userQuestionsPublicData;
 
   return userObject;
 };
@@ -85,11 +109,6 @@ userSchema.statics.findByCredentials = async function (email, password) {
   return searchedUser;
 };
 
-userSchema.pre("save", async function () {
-  const user = this;
-  if (user.isModified(USER_MODEL_KEYS.PASSWORD)) {
-    user.password = await bcrypt.hash(user.password, PASSWORD_HASH_SALT_ROUNDS);
-  }
-});
+userSchema.pre("save", hashPassword);
 
 export default userSchema;
