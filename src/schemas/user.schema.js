@@ -12,7 +12,7 @@ import {
 import { emailValidator, passwordValidator } from "./validators";
 import { BadRequestError, AuthError } from "../controllers/error.controller";
 
-const userSchema = new mongoose.Schema(
+export const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -110,5 +110,3 @@ userSchema.statics.findByCredentials = async function (email, password) {
 };
 
 userSchema.pre("save", hashPassword);
-
-export default userSchema;

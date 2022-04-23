@@ -3,14 +3,17 @@ import { StatusCodes } from "http-status-codes";
 import { API_PREFIX, RESPONSE_RESULT } from "../constants/routers.constants";
 import { getHttpResponse } from "../utils/http.utils";
 import { sendError } from "../controllers/error.controller";
-import authMiddleware from "../middlewares/auth.midddleware";
+import { authMiddleware } from "../middlewares/auth.midddleware";
 import {
-  userRegister, userLogin, userLogout, userLogoutAll,
+  userRegister,
+  userLogin,
+  userLogout,
+  userLogoutAll,
 } from "../controllers/user.controller";
 
-const router = express.Router();
+export const userRouter = express.Router();
 
-router.post(`${API_PREFIX}/register`, async (req, res) => {
+userRouter.post(`${API_PREFIX}/register`, async (req, res) => {
   try {
     const { userPublicData, token } = await userRegister(req);
 
@@ -23,7 +26,7 @@ router.post(`${API_PREFIX}/register`, async (req, res) => {
   }
 });
 
-router.post(`${API_PREFIX}/login`, async (req, res) => {
+userRouter.post(`${API_PREFIX}/login`, async (req, res) => {
   try {
     const { userPublicData, token } = await userLogin(req);
     res.send({ ...getHttpResponse(userPublicData, RESPONSE_RESULT.OK), token });
@@ -32,7 +35,7 @@ router.post(`${API_PREFIX}/login`, async (req, res) => {
   }
 });
 
-router.post(`${API_PREFIX}/logout`, authMiddleware, async (req, res) => {
+userRouter.post(`${API_PREFIX}/logout`, authMiddleware, async (req, res) => {
   try {
     await userLogout(req);
     res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
@@ -41,7 +44,7 @@ router.post(`${API_PREFIX}/logout`, authMiddleware, async (req, res) => {
   }
 });
 
-router.post(`${API_PREFIX}/logoutAll`, authMiddleware, async (req, res) => {
+userRouter.post(`${API_PREFIX}/logoutAll`, authMiddleware, async (req, res) => {
   try {
     await userLogoutAll(req);
     res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
@@ -49,5 +52,3 @@ router.post(`${API_PREFIX}/logoutAll`, authMiddleware, async (req, res) => {
     sendError(res, err);
   }
 });
-
-export default router;

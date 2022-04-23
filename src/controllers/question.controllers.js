@@ -1,4 +1,4 @@
-import Question from "../models/question.model";
+import { Question } from "../models/question.model";
 import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS, USER_MODEL_KEYS } from "../constants/models.constants";
 import { isAllUpdateParamsAllowed } from "../utils/model.utils";
 import { BadRequestError, ForbiddenError } from "./error.controller";

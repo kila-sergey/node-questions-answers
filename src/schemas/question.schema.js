@@ -7,10 +7,10 @@ import {
 } from "../constants/models.constants";
 import { BadRequestError } from "../controllers/error.controller";
 import { getAuthorPopulatedKeys } from "../utils/model.utils";
-import ratingSchema from "./rating.schema";
-import tagSchema from "./tag.schema";
+import { ratingSchema } from "./rating.schema";
+import { tagSchema } from "./tag.schema";
 
-const questionSchema = new mongoose.Schema(
+export const questionSchema = new mongoose.Schema(
   {
     rating: [ratingSchema],
     title: {
@@ -75,5 +75,3 @@ questionSchema.methods.getTag = async function (tagId) {
   }
   return questionTag;
 };
-
-export default questionSchema;

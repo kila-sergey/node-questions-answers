@@ -1,9 +1,9 @@
 import express from "express";
 import "dotenv/config";
 import "./db/mongoose";
-import userRouter from "./routers/user.router";
-import questionRouter from "./routers/question.router";
-import answerRouter from "./routers/answer.router";
+import { userRouter } from "./routers/user.router";
+import { questionRouter } from "./routers/question.router";
+import { answerRouter } from "./routers/answer.router";
 
 const app = express();
 const port = process.env.PORT || 3000;

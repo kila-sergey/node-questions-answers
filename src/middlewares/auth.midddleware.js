@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import { sendError, AuthError } from "../controllers/error.controller";
-import User from "../models/user.model";
+import { User } from "../models/user.model";
 
-const authMiddleware = async (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
   try {
     if (!req.headers.authorization) {
       throw new AuthError("Authorization token wasn't provided");
@@ -23,5 +23,3 @@ const authMiddleware = async (req, res, next) => {
     return sendError(res, new AuthError(err.message));
   }
 };
-
-export default authMiddleware;

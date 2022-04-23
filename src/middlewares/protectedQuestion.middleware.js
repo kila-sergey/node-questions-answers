@@ -1,8 +1,8 @@
 import { sendError, BadRequestError, ForbiddenError } from "../controllers/error.controller";
-import Question from "../models/question.model";
+import { Question } from "../models/question.model";
 import { QUESTION_PARAMS } from "../constants/routers.constants";
 
-const protectedQuestionMiddleware = async (req, res, next) => {
+export const protectedQuestionMiddleware = async (req, res, next) => {
   try {
     const { user } = req;
     const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
@@ -27,5 +27,3 @@ const protectedQuestionMiddleware = async (req, res, next) => {
     sendError(res, err);
   }
 };
-
-export default protectedQuestionMiddleware;

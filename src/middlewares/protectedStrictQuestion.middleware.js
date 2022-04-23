@@ -1,6 +1,6 @@
 import { sendError, ForbiddenError } from "../controllers/error.controller";
 
-const protectedStrictQuestionMiddleware = async (req, res, next) => {
+export const protectedStrictQuestionMiddleware = async (req, res, next) => {
   try {
     const { user } = req;
 
@@ -14,5 +14,3 @@ const protectedStrictQuestionMiddleware = async (req, res, next) => {
     sendError(res, err);
   }
 };
-
-export default protectedStrictQuestionMiddleware;

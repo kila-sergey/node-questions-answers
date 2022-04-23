@@ -5,9 +5,9 @@ import {
   ANSWER_MODEL_KEYS,
 } from "../constants/models.constants";
 import { getAuthorPopulatedKeys } from "../utils/model.utils";
-import ratingSchema from "./rating.schema";
+import { ratingSchema } from "./rating.schema";
 
-const answerSchema = new mongoose.Schema(
+export const answerSchema = new mongoose.Schema(
   {
     text: {
       type: String,
@@ -45,5 +45,3 @@ answerSchema.methods.getPublicData = async function () {
 
   return answerObject;
 };
-
-export default answerSchema;

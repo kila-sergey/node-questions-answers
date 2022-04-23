@@ -1,5 +1,5 @@
-import Answer from "../models/answer.model";
-import Question from "../models/question.model";
+import { Answer } from "../models/answer.model";
+import { Question } from "../models/question.model";
 import { BadRequestError, ForbiddenError } from "./error.controller";
 import {
   ANSWER_MODEL_EDITABLE_KEYS, ANSWER_MODEL_KEYS, USER_MODEL_KEYS, QUESTION_MODEL_KEYS,

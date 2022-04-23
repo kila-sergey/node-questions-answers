@@ -4,9 +4,9 @@ import {
   BadRequestError,
   ForbiddenError,
 } from "../controllers/error.controller";
-import Answer from "../models/answer.model";
+import { Answer } from "../models/answer.model";
 
-const protectedQuestionMiddleware = async (req, res, next) => {
+export const protectedAnswerMiddleware = async (req, res, next) => {
   try {
     const { user } = req;
     const answerId = req.params[ANSWER_PARAMS.ANSWER_ID];
@@ -33,5 +33,3 @@ const protectedQuestionMiddleware = async (req, res, next) => {
     sendError(res, err);
   }
 };
-
-export default protectedQuestionMiddleware;
