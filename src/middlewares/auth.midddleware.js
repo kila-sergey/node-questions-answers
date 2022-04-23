@@ -1,19 +1,17 @@
 import jwt from "jsonwebtoken";
 import { sendError, AuthError } from "../controllers/error.controller";
 import { User } from "../models/user.model";
+import { checkUserExists, checkTokenProvided } from "../validators/auth.validator";
 
 export const authMiddleware = async (req, res, next) => {
   try {
-    if (!req.headers.authorization) {
-      throw new AuthError("Authorization token wasn't provided");
-    }
+    checkTokenProvided(req);
+
     const token = req.headers.authorization.replace("Bearer ", "");
     const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findOne({ _id: decodedToken._id, tokens: token });
 
-    if (!user) {
-      throw new AuthError("Authorization required");
-    }
+    checkUserExists(user);
 
     req.user = user;
     req.token = token;

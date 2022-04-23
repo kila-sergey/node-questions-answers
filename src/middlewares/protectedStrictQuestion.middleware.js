@@ -1,13 +1,11 @@
-import { sendError, ForbiddenError } from "../controllers/error.controller";
+import { sendError } from "../controllers/error.controller";
+import { checkAdmin } from "../validators/access.validator";
 
 export const protectedStrictQuestionMiddleware = async (req, res, next) => {
   try {
     const { user } = req;
 
-    const isAccessAllowed = user.isAdmin;
-    if (!isAccessAllowed) {
-      throw new ForbiddenError("Only admin has access to this action");
-    }
+    checkAdmin(user);
 
     next();
   } catch (err) {

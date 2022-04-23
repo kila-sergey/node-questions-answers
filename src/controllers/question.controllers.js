@@ -1,9 +1,9 @@
 import { Question } from "../models/question.model";
 import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS, USER_MODEL_KEYS } from "../constants/models.constants";
-import { isAllUpdateParamsAllowed } from "../utils/model.utils";
-import { BadRequestError, ForbiddenError } from "./error.controller";
 import { QUESTION_PARAMS } from "../constants/routers.constants";
 import { VOTING_TYPE } from "../constants/other.constants";
+import { checkQuestionIdProvided, checkQuestionTagNameProvided } from "../validators/question.validator";
+import { checkIfVoted, checkUpdateParamsValid } from "../validators/other.validator";
 
 const getQuestionFilters = (query) => {
   const filters = {};
@@ -45,19 +45,15 @@ export const getQuestion = async (req) => {
 export const deleteQuestion = async (req) => {
   const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
 
-  if (!questionId) {
-    throw new BadRequestError("Question id wasn't provided");
-  }
+  checkQuestionIdProvided(questionId);
 
   await Question.deleteOne({ _id: questionId });
 };
 
 export const patchQuestion = async (req) => {
   const updateParams = Object.keys(req.body);
-  if (updateParams.length === 0
-    || !isAllUpdateParamsAllowed(updateParams, QUESTION_MODEL_EDITABLE_KEYS)) {
-    throw new BadRequestError("Invalid update params");
-  }
+
+  checkUpdateParamsValid(updateParams, QUESTION_MODEL_EDITABLE_KEYS);
 
   const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
   const questionToUpdate = await Question.findQuestionById(questionId);
@@ -87,12 +83,7 @@ export const voteToQuestion = async (req, type) => {
 
   const { value } = existingUserRating;
 
-  if (type === VOTING_TYPE.UP && value > 0) {
-    throw new ForbiddenError("You have already voted up this question");
-  }
-  if (type === VOTING_TYPE.DOWN && value < 0) {
-    throw new ForbiddenError("You have already voted down this question");
-  }
+  checkIfVoted(type, value);
 
   const existingUserRatingIndex = questionRatingsArray.indexOf(existingUserRating);
   questionRatingsArray.set(
@@ -110,9 +101,8 @@ export const createQuestionTag = async (req) => {
     .findQuestionById(questionId);
 
   const { name } = req.body;
-  if (!name) {
-    throw new BadRequestError("Tag wasn't provided");
-  }
+
+  checkQuestionTagNameProvided(name);
 
   question[QUESTION_MODEL_KEYS.TAGS].push(req.body);
   const newQuestion = await question.save();

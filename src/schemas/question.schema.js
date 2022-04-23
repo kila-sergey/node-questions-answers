@@ -5,10 +5,10 @@ import {
   ANSWER_MODEL_NAME,
   QUESTION_MODEL_KEYS,
 } from "../constants/models.constants";
-import { BadRequestError } from "../controllers/error.controller";
 import { getAuthorPopulatedKeys } from "../utils/model.utils";
 import { ratingSchema } from "./rating.schema";
 import { tagSchema } from "./tag.schema";
+import { checkQuestionExist, checkQuestionTagExists } from "../validators/question.validator";
 
 export const questionSchema = new mongoose.Schema(
   {
@@ -40,9 +40,7 @@ questionSchema.statics.findQuestionById = async function (id) {
   const question = await this
     .findOne({ _id: id });
 
-  if (!question) {
-    throw new BadRequestError("Question with this id doesn't exist");
-  }
+  checkQuestionExist(question);
 
   return question;
 };
@@ -70,8 +68,8 @@ questionSchema.methods.getPublicData = async function () {
 questionSchema.methods.getTag = async function (tagId) {
   const question = this;
   const questionTag = question[QUESTION_MODEL_KEYS.TAGS].find((tag) => tag.id === tagId);
-  if (!questionTag) {
-    throw new BadRequestError("Tag with this id not found");
-  }
+
+  checkQuestionTagExists(questionTag);
+
   return questionTag;
 };
