@@ -1,7 +1,6 @@
 import express from "express";
 import { StatusCodes } from "http-status-codes";
 import {
-  API_PREFIX,
   RESPONSE_RESULT,
   QUESTION_PARAMS,
 } from "../constants/routers.constants";
@@ -25,7 +24,7 @@ import { sendError } from "../controllers/error.controller";
 
 export const questionRouter = express.Router();
 
-questionRouter.post(`${API_PREFIX}/questions`, authMiddleware, async (req, res) => {
+questionRouter.post("/questions", authMiddleware, async (req, res) => {
   try {
     const createdQuestion = await createQuestion(req);
     res
@@ -36,7 +35,7 @@ questionRouter.post(`${API_PREFIX}/questions`, authMiddleware, async (req, res) 
   }
 });
 
-questionRouter.get(`${API_PREFIX}/questions`, authMiddleware, async (req, res) => {
+questionRouter.get("/questions", authMiddleware, async (req, res) => {
   try {
     const questions = await getAllQuestions(req);
     res.send(getHttpResponse(questions, RESPONSE_RESULT.OK));
@@ -46,7 +45,7 @@ questionRouter.get(`${API_PREFIX}/questions`, authMiddleware, async (req, res) =
 });
 
 questionRouter.get(
-  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
+  `/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
   authMiddleware,
   async (req, res) => {
     try {
@@ -59,7 +58,7 @@ questionRouter.get(
 );
 
 questionRouter.patch(
-  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
+  `/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
   authMiddleware,
   protectedQuestionMiddleware,
   async (req, res) => {
@@ -73,7 +72,7 @@ questionRouter.patch(
 );
 
 questionRouter.delete(
-  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
+  `/questions/:${QUESTION_PARAMS.QUESTION_ID}`,
   authMiddleware,
   protectedQuestionMiddleware,
   async (req, res) => {
@@ -87,7 +86,7 @@ questionRouter.delete(
 );
 
 questionRouter.post(
-  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/upvote`,
+  `/questions/:${QUESTION_PARAMS.QUESTION_ID}/upvote`,
   authMiddleware,
   async (req, res) => {
     try {
@@ -100,7 +99,7 @@ questionRouter.post(
 );
 
 questionRouter.post(
-  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/downvote`,
+  `/questions/:${QUESTION_PARAMS.QUESTION_ID}/downvote`,
   authMiddleware,
   async (req, res) => {
     try {
@@ -113,7 +112,7 @@ questionRouter.post(
 );
 
 questionRouter.post(
-  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags`,
+  `/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags`,
   authMiddleware,
   protectedStrictQuestionMiddleware,
   async (req, res) => {
@@ -129,7 +128,7 @@ questionRouter.post(
 );
 
 questionRouter.delete(
-  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags/:${QUESTION_PARAMS.TAG_ID}`,
+  `/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags/:${QUESTION_PARAMS.TAG_ID}`,
   authMiddleware,
   protectedStrictQuestionMiddleware,
   async (req, res) => {
@@ -143,7 +142,7 @@ questionRouter.delete(
 );
 
 questionRouter.put(
-  `${API_PREFIX}/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags/:${QUESTION_PARAMS.TAG_ID}`,
+  `/questions/:${QUESTION_PARAMS.QUESTION_ID}/tags/:${QUESTION_PARAMS.TAG_ID}`,
   authMiddleware,
   protectedStrictQuestionMiddleware,
   async (req, res) => {

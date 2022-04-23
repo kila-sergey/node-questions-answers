@@ -1,6 +1,6 @@
 import express from "express";
 import { StatusCodes } from "http-status-codes";
-import { API_PREFIX, RESPONSE_RESULT } from "../constants/routers.constants";
+import { RESPONSE_RESULT } from "../constants/routers.constants";
 import { getHttpResponse } from "../utils/http.utils";
 import { sendError } from "../controllers/error.controller";
 import { authMiddleware } from "../middlewares/auth.midddleware";
@@ -13,7 +13,7 @@ import {
 
 export const userRouter = express.Router();
 
-userRouter.post(`${API_PREFIX}/register`, async (req, res) => {
+userRouter.post("/register", async (req, res) => {
   try {
     const { userPublicData, token } = await userRegister(req);
 
@@ -26,7 +26,7 @@ userRouter.post(`${API_PREFIX}/register`, async (req, res) => {
   }
 });
 
-userRouter.post(`${API_PREFIX}/login`, async (req, res) => {
+userRouter.post("/login", async (req, res) => {
   try {
     const { userPublicData, token } = await userLogin(req);
     res.send({ ...getHttpResponse(userPublicData, RESPONSE_RESULT.OK), token });
@@ -35,7 +35,7 @@ userRouter.post(`${API_PREFIX}/login`, async (req, res) => {
   }
 });
 
-userRouter.post(`${API_PREFIX}/logout`, authMiddleware, async (req, res) => {
+userRouter.post("/logout", authMiddleware, async (req, res) => {
   try {
     await userLogout(req);
     res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
@@ -44,7 +44,7 @@ userRouter.post(`${API_PREFIX}/logout`, authMiddleware, async (req, res) => {
   }
 });
 
-userRouter.post(`${API_PREFIX}/logoutAll`, authMiddleware, async (req, res) => {
+userRouter.post("/logoutAll", authMiddleware, async (req, res) => {
   try {
     await userLogoutAll(req);
     res.send(getHttpResponse(null, RESPONSE_RESULT.OK));

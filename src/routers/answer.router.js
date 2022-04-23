@@ -1,6 +1,6 @@
 import express from "express";
 import { StatusCodes } from "http-status-codes";
-import { API_PREFIX, RESPONSE_RESULT, ANSWER_PARAMS } from "../constants/routers.constants";
+import { RESPONSE_RESULT, ANSWER_PARAMS } from "../constants/routers.constants";
 import { VOTING_TYPE } from "../constants/other.constants";
 import { getHttpResponse } from "../utils/http.utils";
 import { authMiddleware } from "../middlewares/auth.midddleware";
@@ -13,7 +13,7 @@ import { sendError } from "../controllers/error.controller";
 
 export const answerRouter = express.Router();
 
-answerRouter.post(`${API_PREFIX}/answers`, authMiddleware, async (req, res) => {
+answerRouter.post("/answers", authMiddleware, async (req, res) => {
   try {
     const createdAnswer = await createAnswer(req);
 
@@ -25,7 +25,7 @@ answerRouter.post(`${API_PREFIX}/answers`, authMiddleware, async (req, res) => {
   }
 });
 
-answerRouter.delete(`${API_PREFIX}/answers/:${ANSWER_PARAMS.ANSWER_ID}`, authMiddleware, protectedAnswerMiddleware, async (req, res) => {
+answerRouter.delete(`/answers/:${ANSWER_PARAMS.ANSWER_ID}`, authMiddleware, protectedAnswerMiddleware, async (req, res) => {
   try {
     await deleteAnswer(req);
     res
@@ -36,7 +36,7 @@ answerRouter.delete(`${API_PREFIX}/answers/:${ANSWER_PARAMS.ANSWER_ID}`, authMid
 });
 
 answerRouter.patch(
-  `${API_PREFIX}/answers/:${ANSWER_PARAMS.ANSWER_ID}`,
+  `/answers/:${ANSWER_PARAMS.ANSWER_ID}`,
   authMiddleware,
   protectedAnswerMiddleware,
   async (req, res) => {
@@ -49,7 +49,7 @@ answerRouter.patch(
   },
 );
 
-answerRouter.post(`${API_PREFIX}/answers/:${ANSWER_PARAMS.ANSWER_ID}/upvote`, authMiddleware, async (req, res) => {
+answerRouter.post(`/answers/:${ANSWER_PARAMS.ANSWER_ID}/upvote`, authMiddleware, async (req, res) => {
   try {
     const votedAnswer = await voteToAnswer(req, VOTING_TYPE.UP);
     res.send(getHttpResponse(votedAnswer, RESPONSE_RESULT.OK));
@@ -58,7 +58,7 @@ answerRouter.post(`${API_PREFIX}/answers/:${ANSWER_PARAMS.ANSWER_ID}/upvote`, au
   }
 });
 
-answerRouter.post(`${API_PREFIX}/answers/:${ANSWER_PARAMS.ANSWER_ID}/downvote`, authMiddleware, async (req, res) => {
+answerRouter.post(`/answers/:${ANSWER_PARAMS.ANSWER_ID}/downvote`, authMiddleware, async (req, res) => {
   try {
     const votedAnswer = await voteToAnswer(req, VOTING_TYPE.DOWN);
     res.send(getHttpResponse(votedAnswer, RESPONSE_RESULT.OK));
