@@ -15,7 +15,7 @@ export const answerRouter = express.Router();
 
 answerRouter.post("/answers", authMiddleware, async (req, res) => {
   try {
-    const createdAnswer = await createAnswer(req);
+    const createdAnswer = await createAnswer(req.user, req.body);
 
     res
       .status(StatusCodes.CREATED)
@@ -27,7 +27,7 @@ answerRouter.post("/answers", authMiddleware, async (req, res) => {
 
 answerRouter.delete(`/answers/:${ANSWER_PARAMS.ANSWER_ID}`, authMiddleware, protectedAnswerMiddleware, async (req, res) => {
   try {
-    await deleteAnswer(req);
+    await deleteAnswer(req.params[ANSWER_PARAMS.ANSWER_ID]);
     res
       .send(getHttpResponse(null, RESPONSE_RESULT.OK));
   } catch (err) {
@@ -41,7 +41,7 @@ answerRouter.patch(
   protectedAnswerMiddleware,
   async (req, res) => {
     try {
-      const updatedAnswer = await patchAnswer(req);
+      const updatedAnswer = await patchAnswer(req.params[ANSWER_PARAMS.ANSWER_ID], req.body);
       res.send(getHttpResponse(updatedAnswer, RESPONSE_RESULT.OK));
     } catch (err) {
       sendError(res, err);
@@ -51,7 +51,11 @@ answerRouter.patch(
 
 answerRouter.post(`/answers/:${ANSWER_PARAMS.ANSWER_ID}/upvote`, authMiddleware, async (req, res) => {
   try {
-    const votedAnswer = await voteToAnswer(req, VOTING_TYPE.UP);
+    const votedAnswer = await voteToAnswer(
+      req.user._id,
+      req.params[ANSWER_PARAMS.ANSWER_ID],
+      VOTING_TYPE.UP,
+    );
     res.send(getHttpResponse(votedAnswer, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
@@ -60,7 +64,11 @@ answerRouter.post(`/answers/:${ANSWER_PARAMS.ANSWER_ID}/upvote`, authMiddleware,
 
 answerRouter.post(`/answers/:${ANSWER_PARAMS.ANSWER_ID}/downvote`, authMiddleware, async (req, res) => {
   try {
-    const votedAnswer = await voteToAnswer(req, VOTING_TYPE.DOWN);
+    const votedAnswer = await voteToAnswer(
+      req.user._id,
+      req.params[ANSWER_PARAMS.ANSWER_ID],
+      VOTING_TYPE.DOWN,
+    );
     res.send(getHttpResponse(votedAnswer, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);

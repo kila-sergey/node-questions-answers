@@ -15,7 +15,7 @@ export const userRouter = express.Router();
 
 userRouter.post("/register", async (req, res) => {
   try {
-    const { userPublicData, token } = await userRegister(req);
+    const { userPublicData, token } = await userRegister(req.body);
 
     res.status(StatusCodes.CREATED).send({
       ...getHttpResponse(userPublicData, RESPONSE_RESULT.OK),
@@ -28,7 +28,8 @@ userRouter.post("/register", async (req, res) => {
 
 userRouter.post("/login", async (req, res) => {
   try {
-    const { userPublicData, token } = await userLogin(req);
+    const { email, password } = req.body;
+    const { userPublicData, token } = await userLogin(email, password);
     res.send({ ...getHttpResponse(userPublicData, RESPONSE_RESULT.OK), token });
   } catch (err) {
     sendError(res, err);
@@ -37,7 +38,8 @@ userRouter.post("/login", async (req, res) => {
 
 userRouter.post("/logout", authMiddleware, async (req, res) => {
   try {
-    await userLogout(req);
+    const { user, token } = req;
+    await userLogout(user, token);
     res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
@@ -46,7 +48,8 @@ userRouter.post("/logout", authMiddleware, async (req, res) => {
 
 userRouter.post("/logoutAll", authMiddleware, async (req, res) => {
   try {
-    await userLogoutAll(req);
+    const { user } = req;
+    await userLogoutAll(user);
     res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);

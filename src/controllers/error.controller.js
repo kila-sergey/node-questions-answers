@@ -33,8 +33,9 @@ export class ForbiddenError extends Error {
 }
 
 export const sendError = (res, err) => {
-  console.log(JSON.stringify(err));
   console.log("ErrorName", err.name);
+  console.log("ErrorMessage", err.message);
+
   if (err.name === ERROR_NAME.VALIDATION_ERROR) {
     res
       .status(StatusCodes.BAD_REQUEST)

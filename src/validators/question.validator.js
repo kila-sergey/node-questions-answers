@@ -1,7 +1,7 @@
 import { BadRequestError } from "../controllers/error.controller";
 
 export const checkQuestionIdProvided = (questionId) => {
-  if (!questionId) {
+  if (!questionId || questionId === "null") {
     throw new BadRequestError("Question id wasn't provided");
   }
 };

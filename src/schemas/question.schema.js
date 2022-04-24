@@ -8,7 +8,7 @@ import {
 import { getAuthorPopulatedKeys } from "../utils/model.utils";
 import { ratingSchema } from "./rating.schema";
 import { tagSchema } from "./tag.schema";
-import { checkQuestionExist, checkQuestionTagExists } from "../validators/question.validator";
+import { checkQuestionExist, checkQuestionTagExists, checkQuestionIdProvided } from "../validators/question.validator";
 
 export const questionSchema = new mongoose.Schema(
   {
@@ -37,6 +37,8 @@ export const questionSchema = new mongoose.Schema(
 );
 
 questionSchema.statics.findQuestionById = async function (id) {
+  checkQuestionIdProvided(id);
+
   const question = await this
     .findOne({ _id: id });
 

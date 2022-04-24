@@ -1,21 +1,21 @@
 import { Question } from "../models/question.model";
 import { QUESTION_MODEL_KEYS, QUESTION_MODEL_EDITABLE_KEYS, USER_MODEL_KEYS } from "../constants/models.constants";
-import { QUESTION_PARAMS } from "../constants/routers.constants";
 import { VOTING_TYPE } from "../constants/other.constants";
-import { checkQuestionIdProvided, checkQuestionTagNameProvided } from "../validators/question.validator";
+import { checkQuestionTagNameProvided, checkQuestionExist } from "../validators/question.validator";
 import { checkIfVoted, checkUpdateParamsValid } from "../validators/other.validator";
 
 const getQuestionFilters = (query) => {
   const filters = {};
   if (query.tags) {
-    filters.tags = query.tags.split(",");
+    const tagsArray = query[QUESTION_MODEL_KEYS.TAGS].split(",");
+    filters["tags.name"] = tagsArray;
   }
   return filters;
 };
 
-export const createQuestion = async (req) => {
-  const author = await req.user;
-  const question = new Question({ ...req.body, author: author._id });
+export const createQuestion = async (user, questionBody) => {
+  const author = user;
+  const question = new Question({ ...questionBody, author: author._id });
   const createdQuestion = await question.save();
 
   author[USER_MODEL_KEYS.QUESTIONS].push(createdQuestion._id);
@@ -24,8 +24,8 @@ export const createQuestion = async (req) => {
   return createdQuestion.getPublicData();
 };
 
-export const getAllQuestions = async (req) => {
-  const filters = getQuestionFilters(req.query);
+export const getAllQuestions = async (query) => {
+  const filters = getQuestionFilters(query);
   const questions = await Question
     .find({
       ...filters,
@@ -35,40 +35,38 @@ export const getAllQuestions = async (req) => {
   return Promise.all(questionsPromises);
 };
 
-export const getQuestion = async (req) => {
-  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+export const getQuestion = async (questionId) => {
   const question = await Question
     .findQuestionById(questionId);
+
   return question.getPublicData();
 };
 
-export const deleteQuestion = async (req) => {
-  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+export const deleteQuestion = async (questionId) => {
+  const question = await Question
+    .findQuestionById(questionId);
 
-  checkQuestionIdProvided(questionId);
+  checkQuestionExist(question);
 
   await Question.deleteOne({ _id: questionId });
 };
 
-export const patchQuestion = async (req) => {
-  const updateParams = Object.keys(req.body);
+export const patchQuestion = async (questionId, questionBody) => {
+  const updateParams = Object.keys(questionBody);
 
   checkUpdateParamsValid(updateParams, QUESTION_MODEL_EDITABLE_KEYS);
 
-  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
   const questionToUpdate = await Question.findQuestionById(questionId);
 
   updateParams.forEach((paramKey) => {
-    questionToUpdate[paramKey] = req.body[paramKey];
+    questionToUpdate[paramKey] = questionBody[paramKey];
   });
 
   const updatedQuestion = await questionToUpdate.save();
   return updatedQuestion.getPublicData();
 };
 
-export const voteToQuestion = async (req, type) => {
-  const userId = req.user._id;
-  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+export const voteToQuestion = async (userId, questionId, type) => {
   const questionToVote = await Question.findQuestionById(questionId);
 
   const questionRatingsArray = questionToVote[QUESTION_MODEL_KEYS.RATING];
@@ -95,23 +93,20 @@ export const voteToQuestion = async (req, type) => {
   return votedQuestion.getPublicData();
 };
 
-export const createQuestionTag = async (req) => {
-  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
+export const createQuestionTag = async (questionId, tagBody) => {
   const question = await Question
     .findQuestionById(questionId);
 
-  const { name } = req.body;
+  const { name } = tagBody;
 
   checkQuestionTagNameProvided(name);
 
-  question[QUESTION_MODEL_KEYS.TAGS].push(req.body);
+  question[QUESTION_MODEL_KEYS.TAGS].push(tagBody);
   const newQuestion = await question.save();
   return newQuestion.getPublicData();
 };
 
-export const deleteQuestionTag = async (req) => {
-  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
-  const tagId = req.params[QUESTION_PARAMS.TAG_ID];
+export const deleteQuestionTag = async (questionId, tagId) => {
   const question = await Question
     .findQuestionById(questionId);
 
@@ -123,9 +118,7 @@ export const deleteQuestionTag = async (req) => {
   return newQuestion;
 };
 
-export const updateQuestionTag = async (req) => {
-  const questionId = req.params[QUESTION_PARAMS.QUESTION_ID];
-  const tagId = req.params[QUESTION_PARAMS.TAG_ID];
+export const updateQuestionTag = async (questionId, tagId, tagBody) => {
   const question = await Question
     .findQuestionById(questionId);
 
@@ -136,7 +129,7 @@ export const updateQuestionTag = async (req) => {
     questionTagIndex,
     {
       _id: questionTag._id,
-      ...req.body,
+      ...tagBody,
     },
   );
 

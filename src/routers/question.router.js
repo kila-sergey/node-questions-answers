@@ -26,7 +26,7 @@ export const questionRouter = express.Router();
 
 questionRouter.post("/questions", authMiddleware, async (req, res) => {
   try {
-    const createdQuestion = await createQuestion(req);
+    const createdQuestion = await createQuestion(req.user, req.body);
     res
       .status(StatusCodes.CREATED)
       .send(getHttpResponse(createdQuestion, RESPONSE_RESULT.OK));
@@ -37,7 +37,7 @@ questionRouter.post("/questions", authMiddleware, async (req, res) => {
 
 questionRouter.get("/questions", authMiddleware, async (req, res) => {
   try {
-    const questions = await getAllQuestions(req);
+    const questions = await getAllQuestions(req.query);
     res.send(getHttpResponse(questions, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
@@ -49,7 +49,7 @@ questionRouter.get(
   authMiddleware,
   async (req, res) => {
     try {
-      const question = await getQuestion(req);
+      const question = await getQuestion(req.params[QUESTION_PARAMS.QUESTION_ID]);
       res.send(getHttpResponse(question, RESPONSE_RESULT.OK));
     } catch (err) {
       sendError(res, err);
@@ -63,7 +63,10 @@ questionRouter.patch(
   protectedQuestionMiddleware,
   async (req, res) => {
     try {
-      const updatedQuestion = await patchQuestion(req);
+      const updatedQuestion = await patchQuestion(
+        req.params[QUESTION_PARAMS.QUESTION_ID],
+        req.body,
+      );
       res.send(getHttpResponse(updatedQuestion, RESPONSE_RESULT.OK));
     } catch (err) {
       sendError(res, err);
@@ -77,7 +80,7 @@ questionRouter.delete(
   protectedQuestionMiddleware,
   async (req, res) => {
     try {
-      await deleteQuestion(req);
+      await deleteQuestion(req.params[QUESTION_PARAMS.QUESTION_ID]);
       res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
     } catch (err) {
       sendError(res, err);
@@ -90,7 +93,11 @@ questionRouter.post(
   authMiddleware,
   async (req, res) => {
     try {
-      const upVotedQuestion = await voteToQuestion(req, VOTING_TYPE.UP);
+      const upVotedQuestion = await voteToQuestion(
+        req.user._id,
+        req.params[QUESTION_PARAMS.QUESTION_ID],
+        VOTING_TYPE.UP,
+      );
       res.send(getHttpResponse(upVotedQuestion, RESPONSE_RESULT.OK));
     } catch (err) {
       sendError(res, err);
@@ -103,7 +110,11 @@ questionRouter.post(
   authMiddleware,
   async (req, res) => {
     try {
-      const downVotedQuestion = await voteToQuestion(req, VOTING_TYPE.DOWN);
+      const downVotedQuestion = await voteToQuestion(
+        req.user._id,
+        req.params[QUESTION_PARAMS.QUESTION_ID],
+        VOTING_TYPE.DOWN,
+      );
       res.send(getHttpResponse(downVotedQuestion, RESPONSE_RESULT.OK));
     } catch (err) {
       sendError(res, err);
@@ -117,7 +128,7 @@ questionRouter.post(
   protectedStrictQuestionMiddleware,
   async (req, res) => {
     try {
-      const question = await createQuestionTag(req);
+      const question = await createQuestionTag(req.params[QUESTION_PARAMS.QUESTION_ID], req.body);
       res
         .status(StatusCodes.CREATED)
         .send(getHttpResponse(question, RESPONSE_RESULT.OK));
@@ -133,7 +144,11 @@ questionRouter.delete(
   protectedStrictQuestionMiddleware,
   async (req, res) => {
     try {
-      const question = await deleteQuestionTag(req);
+      const question = await deleteQuestionTag(
+        req.params[QUESTION_PARAMS.QUESTION_ID],
+        req.params[QUESTION_PARAMS.TAG_ID],
+      );
+
       res.send(getHttpResponse(question, RESPONSE_RESULT.OK));
     } catch (err) {
       sendError(res, err);
@@ -147,7 +162,12 @@ questionRouter.put(
   protectedStrictQuestionMiddleware,
   async (req, res) => {
     try {
-      const question = await updateQuestionTag(req);
+      const question = await updateQuestionTag(
+        req.params[QUESTION_PARAMS.QUESTION_ID],
+        req.params[QUESTION_PARAMS.TAG_ID],
+        req.body,
+      );
+
       res.send(getHttpResponse(question, RESPONSE_RESULT.OK));
     } catch (err) {
       sendError(res, err);
