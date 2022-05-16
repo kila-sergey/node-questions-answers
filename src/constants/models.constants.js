@@ -1,6 +1,7 @@
 export const QUESTION_MODEL_NAME = "Question";
 export const ANSWER_MODEL_NAME = "Answer";
 export const USER_MODEL_NAME = "User";
+export const FILE_MODEL_NAME = "File";
 
 export const PASSWORD_HASH_SALT_ROUNDS = 8;
 
