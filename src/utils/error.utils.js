@@ -32,3 +32,7 @@ export const getAuthError = (err) => ({
 export const getForbiddenError = (err) => ({
   error: err.message,
 });
+
+export const getMulterError = (err) => ({
+  error: err.message,
+});

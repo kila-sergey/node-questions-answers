@@ -4,4 +4,5 @@ export const ERROR_NAME = {
   BAD_REQUEST_ERROR: "BadRequestError",
   AUTH_ERROR: "AuthError",
   FORBIDDEN_ERROR: "ForbiddenError",
+  MULTER_ERROR: "MulterError",
 };

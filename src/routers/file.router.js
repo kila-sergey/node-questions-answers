@@ -1,42 +1,48 @@
 import express from "express";
 import multer from "multer";
 
-import { File } from "../models/file.model";
+import { FILE_ALLOWED_MIMETYPES } from "../constants/file.constants";
 import { authMiddleware } from "../middlewares/auth.midddleware";
 import { sendError } from "../controllers/error.controller";
-import { checkUserIdProvided } from "../validators/user.validators";
-import { checkFileIdProvided } from "../validators/file.validators";
+import { postAvatar } from "../controllers/file.controller";
+import { getFileExtensionFromMimetype } from "../utils/file.utils";
 
-// TODO:MAKE VALIDATION ON FILES
-// TODO:REFACTOR USING CONTROLLERS
+export const fileRouter = express.Router();
+
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, "uploads/");
   },
   filename(req, file, cb) {
-    cb(null, `${Date.now()}.jpg`);
+    const extension = getFileExtensionFromMimetype(file.mimetype);
+    cb(null, `${Date.now()}.${extension}`);
   },
 });
 
-export const fileRouter = express.Router();
-
-const uploadAvatar = multer({ storage }).single("file");
+const uploadAvatar = multer({
+  storage,
+  limits: {
+    fileSize: 2e6,
+  },
+  fileFilter(req, file, cb) {
+    if (!FILE_ALLOWED_MIMETYPES.includes(file.mimetype)) {
+      return cb(new Error("Only .jpg, .jpeg, .png formats are supported"));
+    }
+    cb(null, true);
+  },
+}).single("file");
 
 fileRouter.post("/files/avatar/:userId", authMiddleware, uploadAvatar, async (req, res) => {
   try {
     const userAvatarFile = req.file;
     const { userId } = req.params;
 
-    checkUserIdProvided(userId);
+    const createdFile = await postAvatar(userAvatarFile, userId);
 
-    checkFileIdProvided(userAvatarFile);
-
-    const file = new File({ name: userAvatarFile.filename, user: userId });
-    const createdFile = await file.save();
     res.send(createdFile);
   } catch (err) {
     sendError(res, err);
   }
-}, (err, req, res, next) => {
+}, (err, req, res) => {
   sendError(res, err);
 });

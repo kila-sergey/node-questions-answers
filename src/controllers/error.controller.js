@@ -8,6 +8,7 @@ import {
   getAuthError,
   getServerError,
   getForbiddenError,
+  getMulterError,
 } from "../utils/error.utils";
 import { ERROR_NAME } from "../constants/errors.constants";
 
@@ -33,9 +34,7 @@ export class ForbiddenError extends Error {
 }
 
 export const sendError = (res, err) => {
-  console.log("ErrorName", err.name);
-  console.log("ErrorMessage", err.message);
-
+  console.log("FullError", JSON.stringify(err));
   if (err.name === ERROR_NAME.VALIDATION_ERROR) {
     res
       .status(StatusCodes.BAD_REQUEST)
@@ -56,6 +55,9 @@ export const sendError = (res, err) => {
     res
       .status(StatusCodes.FORBIDDEN)
       .send(getHttpResponse(getForbiddenError(err), RESPONSE_RESULT.FAILED));
+  } else if (err.name === ERROR_NAME.MULTER_ERROR) {
+    res.status(StatusCodes.BAD_REQUEST)
+      .send(getHttpResponse(getMulterError(err), RESPONSE_RESULT.FAILED));
   } else {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
