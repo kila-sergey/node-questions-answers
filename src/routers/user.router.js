@@ -55,3 +55,13 @@ userRouter.post("/logoutAll", authMiddleware, async (req, res) => {
     sendError(res, err);
   }
 });
+
+userRouter.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const { user } = req;
+    const userPublicData = await user.getPublicData({ withAvatar: true });
+    res.send(getHttpResponse(userPublicData, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});

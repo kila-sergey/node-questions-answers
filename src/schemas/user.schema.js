@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+import { File } from "../models/file.model";
 import {
   ANSWER_MODEL_NAME,
   QUESTION_MODEL_NAME,
@@ -55,7 +56,7 @@ async function hashPassword(next) {
   next();
 }
 
-userSchema.methods.getPublicData = async function () {
+userSchema.methods.getPublicData = async function ({ withAvatar }) {
   const user = this;
 
   const populatedUser = await user
@@ -78,6 +79,11 @@ userSchema.methods.getPublicData = async function () {
     .map(async (question) => question.getPublicData());
   const userQuestionsPublicData = await Promise.all(userQuestionsPromises);
   userObject[USER_MODEL_KEYS.QUESTIONS] = userQuestionsPublicData;
+
+  if (withAvatar) {
+    const userAvatar = await File.findOne({ user: populatedUser._id });
+    userObject.avatar = userAvatar ? `${process.env.PUBLIC_URL}/uploads/${userAvatar.name}` : null;
+  }
 
   return userObject;
 };
