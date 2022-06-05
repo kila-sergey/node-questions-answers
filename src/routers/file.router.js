@@ -1,48 +1,48 @@
 import express from "express";
-import multer from "multer";
 
-import { FILE_ALLOWED_MIMETYPES } from "../constants/file.constants";
 import { authMiddleware } from "../middlewares/auth.midddleware";
-import { sendError } from "../controllers/error.controller";
-import { postAvatar } from "../controllers/file.controller";
-import { getFileExtensionFromMimetype } from "../utils/file.utils";
+import { uploadAvatarMiddleware, uploadFilesMiddleware } from "../middlewares/files.middelware";
+import { BadRequestError, sendError } from "../controllers/error.controller";
+import { postAvatar, postQuestionFiles } from "../controllers/file.controller";
 
 export const fileRouter = express.Router();
 
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename(req, file, cb) {
-    const extension = getFileExtensionFromMimetype(file.mimetype);
-    cb(null, `${Date.now()}.${extension}`);
-  },
-});
+fileRouter.post(
+  "/files/avatar/:userId",
+  authMiddleware,
+  async (req, res) => {
+    uploadAvatarMiddleware(req, res, async (err) => {
+      try {
+        if (err) {
+          throw new BadRequestError(err);
+        }
 
-const uploadAvatar = multer({
-  storage,
-  limits: {
-    fileSize: 2e6,
+        const userAvatarFile = req.file;
+        const { userId } = req.params;
+
+        const createdFile = await postAvatar(userAvatarFile, userId);
+
+        res.send(createdFile);
+      } catch (error) {
+        sendError(res, error);
+      }
+    });
   },
-  fileFilter(req, file, cb) {
-    if (!FILE_ALLOWED_MIMETYPES.includes(file.mimetype)) {
-      return cb(new Error("Only .jpg, .jpeg, .png formats are supported"));
+);
+
+fileRouter.post("/files/question/:questionId", authMiddleware, async (req, res) => {
+  uploadFilesMiddleware(req, res, async (err) => {
+    try {
+      if (err) {
+        throw new BadRequestError(err);
+      }
+
+      const questionFiles = req.files;
+      const { questionId } = req.params;
+      const createdFiles = await postQuestionFiles(questionFiles, questionId);
+      res.send(createdFiles);
+    } catch (error) {
+      sendError(res, error);
     }
-    cb(null, true);
-  },
-}).single("file");
-
-fileRouter.post("/files/avatar/:userId", authMiddleware, uploadAvatar, async (req, res) => {
-  try {
-    const userAvatarFile = req.file;
-    const { userId } = req.params;
-
-    const createdFile = await postAvatar(userAvatarFile, userId);
-
-    res.send(createdFile);
-  } catch (err) {
-    sendError(res, err);
-  }
-}, (err, req, res) => {
-  sendError(res, err);
+  });
 });

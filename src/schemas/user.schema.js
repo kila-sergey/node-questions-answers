@@ -12,6 +12,7 @@ import {
 } from "../constants/models.constants";
 import { emailValidator, passwordValidator } from "./validators";
 import { BadRequestError, AuthError } from "../controllers/error.controller";
+import { getPublicFileName } from "../utils/file.utils";
 
 export const userSchema = new mongoose.Schema(
   {
@@ -82,7 +83,7 @@ userSchema.methods.getPublicData = async function ({ withAvatar }) {
 
   if (withAvatar) {
     const userAvatar = await File.findOne({ user: populatedUser._id });
-    userObject.avatar = userAvatar ? `${process.env.PUBLIC_URL}/uploads/${userAvatar.name}` : null;
+    userObject.avatar = userAvatar ? getPublicFileName(userAvatar.name) : null;
   }
 
   return userObject;

@@ -5,3 +5,9 @@ export const checkFileProvided = (file) => {
     throw new BadRequestError("File wasn't provided");
   }
 };
+
+export const checkFilesProvided = (files) => {
+  if (!files || files.length < 1) {
+    throw new BadRequestError("Files wasn't provided");
+  }
+};

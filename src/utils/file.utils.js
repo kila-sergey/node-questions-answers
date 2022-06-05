@@ -8,7 +8,13 @@ export const getFileExtensionFromMimetype = (mimetype) => {
     return "png";
   case FILE_MIMETYPE.JPG:
     return "jpg";
+  case FILE_MIMETYPE.WEBP:
+    return "webp";
   default:
     return "unknown";
   }
 };
+
+export const getFileNameWithoutExtension = (fileName) => fileName.split("/")[0] || fileName;
+
+export const getPublicFileName = (fileName) => `${process.env.PUBLIC_URL}/uploads/${fileName}`;

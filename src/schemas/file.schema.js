@@ -11,6 +11,7 @@ export const fileSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    unique: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId, ref: USER_MODEL_NAME,

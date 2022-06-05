@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+import { File } from "../models/file.model";
 import {
   USER_MODEL_NAME,
   ANSWER_MODEL_NAME,
@@ -9,6 +10,7 @@ import { getAuthorPopulatedKeys } from "../utils/model.utils";
 import { ratingSchema } from "./rating.schema";
 import { tagSchema } from "./tag.schema";
 import { checkQuestionExist, checkQuestionTagExists, checkQuestionIdProvided } from "../validators/question.validator";
+import { getPublicFileName } from "../utils/file.utils";
 
 export const questionSchema = new mongoose.Schema(
   {
@@ -63,6 +65,9 @@ questionSchema.methods.getPublicData = async function () {
     .map(async (answer) => answer.getPublicData());
   const questionsAnswers = await Promise.all(questionsAnswersPromises);
   questionObject[QUESTION_MODEL_KEYS.ANSWERS] = questionsAnswers;
+
+  const questionFiles = await File.find({ question: questionObject._id });
+  questionObject.files = questionFiles.map((item) => getPublicFileName(item.name));
 
   return questionObject;
 };
