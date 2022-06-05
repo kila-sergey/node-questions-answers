@@ -1,3 +1,6 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
 import { FILE_MIMETYPE } from "../constants/file.constants";
 
 export const getFileExtensionFromMimetype = (mimetype) => {
@@ -18,3 +21,8 @@ export const getFileExtensionFromMimetype = (mimetype) => {
 export const getFileNameWithoutExtension = (fileName) => fileName.split(".")[0] || fileName;
 
 export const getPublicFileName = (fileName) => `${process.env.PUBLIC_URL}/uploads/${fileName}`;
+
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
+
+export const getUploadsDirectoryPath = () => path.join(dirname, "../../uploads");

@@ -10,7 +10,8 @@ export const postAvatar = async (avatarFile, userId) => {
 
   checkFileProvided(avatarFile);
 
-  await File.deleteOne({ user: userId });
+  // To delete previously downloaded avatar
+  await File.deleteFiles({ user: userId });
 
   const file = new File({ name: avatarFile.filename, user: userId });
   const createdFile = await file.save();
@@ -23,7 +24,8 @@ export const postQuestionFiles = async (files, questionId) => {
 
   checkFilesProvided(files);
 
-  await File.deleteMany({ question: questionId });
+  // To delete previously downloaded files
+  await File.deleteFiles({ question: questionId });
 
   const createdFiles = await Promise.all(files.map(async (item) => {
     const file = new File({ name: item.filename, question: questionId });
@@ -40,7 +42,8 @@ export const postAnswerFiles = async (files, answerId) => {
 
   checkFilesProvided(files);
 
-  await File.deleteMany({ answer: answerId });
+  // To delete previously downloaded files
+  await File.deleteFiles({ answer: answerId });
 
   const createdFiles = await Promise.all(files.map(async (item) => {
     const file = new File({ name: item.filename, answer: answerId });
