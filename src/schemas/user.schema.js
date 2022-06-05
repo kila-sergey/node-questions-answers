@@ -57,11 +57,13 @@ async function hashPassword(next) {
   next();
 }
 
-userSchema.methods.getPublicData = async function ({ withAvatar }) {
+userSchema.methods.getPublicData = async function (settings) {
   const user = this;
 
-  const populatedUser = await user
-    .populate([{ path: USER_MODEL_KEYS.QUESTIONS }, { path: USER_MODEL_KEYS.ANSWERS }]);
+  const populatedUser = await user.populate([
+    { path: USER_MODEL_KEYS.QUESTIONS },
+    { path: USER_MODEL_KEYS.ANSWERS },
+  ]);
 
   const userObject = populatedUser.toObject();
 
@@ -70,18 +72,20 @@ userSchema.methods.getPublicData = async function ({ withAvatar }) {
   });
 
   // Get public data for answers
-  const userAnswersPromises = populatedUser[USER_MODEL_KEYS.ANSWERS]
-    .map(async (answer) => answer.getPublicData());
+  const userAnswersPromises = populatedUser[USER_MODEL_KEYS.ANSWERS].map(
+    async (answer) => answer.getPublicData(),
+  );
   const userAnswersPublicData = await Promise.all(userAnswersPromises);
   userObject[USER_MODEL_KEYS.ANSWERS] = userAnswersPublicData;
 
   // Get public data for questions
-  const userQuestionsPromises = populatedUser[USER_MODEL_KEYS.QUESTIONS]
-    .map(async (question) => question.getPublicData());
+  const userQuestionsPromises = populatedUser[USER_MODEL_KEYS.QUESTIONS].map(
+    async (question) => question.getPublicData(),
+  );
   const userQuestionsPublicData = await Promise.all(userQuestionsPromises);
   userObject[USER_MODEL_KEYS.QUESTIONS] = userQuestionsPublicData;
 
-  if (withAvatar) {
+  if (settings?.withAvatar) {
     const userAvatar = await File.findOne({ user: populatedUser._id });
     userObject.avatar = userAvatar ? getPublicFileName(userAvatar.name) : null;
   }
@@ -109,7 +113,10 @@ userSchema.statics.findByCredentials = async function (email, password) {
   if (!searchedUser) {
     throw new AuthError("User with this email doesn't exist");
   }
-  const isPasswordsMatched = await bcrypt.compare(password, searchedUser.password);
+  const isPasswordsMatched = await bcrypt.compare(
+    password,
+    searchedUser.password,
+  );
   if (!isPasswordsMatched) {
     throw new AuthError("Incorrect password");
   }

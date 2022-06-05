@@ -66,6 +66,7 @@ questionSchema.methods.getPublicData = async function () {
   const questionsAnswers = await Promise.all(questionsAnswersPromises);
   questionObject[QUESTION_MODEL_KEYS.ANSWERS] = questionsAnswers;
 
+  // Add files to response
   const questionFiles = await File.find({ question: questionObject._id });
   questionObject.files = questionFiles.map((item) => getPublicFileName(item.name));
 

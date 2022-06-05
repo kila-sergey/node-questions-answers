@@ -15,6 +15,6 @@ export const getFileExtensionFromMimetype = (mimetype) => {
   }
 };
 
-export const getFileNameWithoutExtension = (fileName) => fileName.split("/")[0] || fileName;
+export const getFileNameWithoutExtension = (fileName) => fileName.split(".")[0] || fileName;
 
 export const getPublicFileName = (fileName) => `${process.env.PUBLIC_URL}/uploads/${fileName}`;

@@ -21,9 +21,13 @@ export const getServerError = (err) => ({
   error: err.message,
 });
 
-export const getBadRequestError = (err) => ({
-  error: err.message,
-});
+export const getBadRequestError = (err) => {
+  const errorMessage = err.message.replace("MulterError", "FilesError");
+
+  return {
+    error: errorMessage,
+  };
+};
 
 export const getAuthError = (err) => ({
   error: err.message,
@@ -33,6 +37,10 @@ export const getForbiddenError = (err) => ({
   error: err.message,
 });
 
-export const getMulterError = (err) => ({
-  error: err.message,
-});
+export const getMulterError = (err) => {
+  const errorMessage = err.message.replace("MulterError", "FilesError");
+
+  return {
+    error: errorMessage,
+  };
+};
