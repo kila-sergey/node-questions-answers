@@ -22,5 +22,8 @@ module.exports = {
     "no-underscore-dangle": ["error", { allow: ["_id"] }],
     "max-classes-per-file": OFF,
     "consistent-return": OFF,
+    "no-param-reassign": [2, {
+      props: false,
+    }],
   },
 };

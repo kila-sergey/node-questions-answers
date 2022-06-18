@@ -7,7 +7,7 @@ import { API_PREFIX } from "./constants/routers.constants";
 import { getUploadsDirectoryPath } from "./utils/file.utils";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 app.use(express.json());
 app.use(API_PREFIX, defaultRouter);

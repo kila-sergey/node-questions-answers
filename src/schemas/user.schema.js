@@ -13,6 +13,7 @@ import {
 import { emailValidator, passwordValidator } from "./validators";
 import { BadRequestError, AuthError } from "../controllers/error.controller";
 import { getPublicFileName } from "../utils/file.utils";
+import { checkIsPasswordCorrect } from "../validators/user.validators";
 
 export const userSchema = new mongoose.Schema(
   {
@@ -113,12 +114,20 @@ userSchema.statics.findByCredentials = async function (email, password) {
   if (!searchedUser) {
     throw new AuthError("User with this email doesn't exist");
   }
-  const isPasswordsMatched = await bcrypt.compare(
-    password,
-    searchedUser.password,
-  );
-  if (!isPasswordsMatched) {
-    throw new AuthError("Incorrect password");
+
+  await checkIsPasswordCorrect(password, searchedUser.password);
+
+  return searchedUser;
+};
+
+userSchema.statics.findByEmail = async function (email) {
+  const user = this;
+  if (!email) {
+    throw new BadRequestError("Email is required");
+  }
+  const searchedUser = await user.findOne({ email });
+  if (!searchedUser) {
+    throw new AuthError("User with this email doesn't exist");
   }
   return searchedUser;
 };

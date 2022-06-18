@@ -9,6 +9,8 @@ import {
   userLogin,
   userLogout,
   userLogoutAll,
+  userResetPassword,
+  userChangePassword,
 } from "../controllers/user.controller";
 
 export const userRouter = express.Router();
@@ -61,6 +63,27 @@ userRouter.get("/me", authMiddleware, async (req, res) => {
     const { user } = req;
     const userPublicData = await user.getPublicData({ withAvatar: true });
     res.send(getHttpResponse(userPublicData, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+userRouter.post("/password/reset", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const newPassword = await userResetPassword(email);
+    res.send(getHttpResponse(newPassword, RESPONSE_RESULT.OK));
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+userRouter.post("/password/change", authMiddleware, async (req, res) => {
+  try {
+    const { user } = req;
+    const { oldPassword, newPassword, newPasswordCopy } = req.body;
+    await userChangePassword(user, oldPassword, newPassword, newPasswordCopy);
+    res.send(getHttpResponse(null, RESPONSE_RESULT.OK));
   } catch (err) {
     sendError(res, err);
   }
