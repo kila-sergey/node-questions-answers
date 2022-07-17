@@ -7,6 +7,7 @@ module.exports = {
     browser: true,
     es2021: true,
     node: true,
+    jest: true,
   },
   extends: ["airbnb-base"],
   parserOptions: {
@@ -22,8 +23,11 @@ module.exports = {
     "no-underscore-dangle": ["error", { allow: ["_id"] }],
     "max-classes-per-file": OFF,
     "consistent-return": OFF,
-    "no-param-reassign": [2, {
-      props: false,
-    }],
+    "no-param-reassign": [
+      2,
+      {
+        props: false,
+      },
+    ],
   },
 };
