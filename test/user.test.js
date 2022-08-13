@@ -2,7 +2,7 @@ import request from "supertest";
 import mongoose from "mongoose";
 
 import { app } from "../src/app";
-import { setupDataBase } from "./fixtures/db";
+import { setupDataBase, testUserOne, testUserOneId } from "./fixtures/db";
 import { User } from "../src/models/user.model";
 import { API_PREFIX } from "../src/constants/routers.constants";
 
@@ -12,7 +12,7 @@ afterAll(() => {
   mongoose.disconnect();
 });
 
-describe("[user sign up]", () => {
+describe("[user register]", () => {
   it("[success] Should create new user with encrypted password", async () => {
     const response = await request(app)
       .post(`${API_PREFIX}/register`)
@@ -52,5 +52,85 @@ describe("[user sign up]", () => {
         password: "small",
       })
       .expect(400);
+  });
+});
+
+describe("[user login]", () => {
+  it("[success] Should login already created user", async () => {
+    const response = await request(app)
+      .post(`${API_PREFIX}/login`)
+      .send({
+        email: testUserOne.email,
+        password: testUserOne.password,
+      })
+      .expect(200);
+
+    const loggedInUser = await User.findById(response.body.data._id);
+
+    // New token exists in database
+    expect(loggedInUser.tokens).toEqual(
+      expect.arrayContaining([response.body.token]),
+    );
+  });
+
+  it("[fail] Should fails with wrong params", async () => {
+    await request(app)
+      .post(`${API_PREFIX}/login`)
+      .send({
+        email: "wrongEmail@test.com",
+        password: testUserOne.password,
+      })
+      .expect(401);
+  });
+});
+
+describe("[user logout]", () => {
+  it("[success] Should logout logged in user", async () => {
+    await request(app)
+      .post(`${API_PREFIX}/logout`)
+      .set("Authorization", `Bearer ${testUserOne.tokens[0]}`)
+      .expect(200);
+
+    const loggedOutUser = await User.findById(testUserOneId);
+
+    // Token removed from database
+    expect(loggedOutUser.tokens).toEqual(
+      expect.not.arrayContaining([testUserOne.tokens[0]]),
+    );
+  });
+
+  it("[fail] Should fails if user unauthorized", async () => {
+    await request(app)
+      .post(`${API_PREFIX}/logout`)
+      .expect(401);
+  });
+});
+
+describe("[user logout from all the devices]", () => {
+  it("[success] Should logout user from all the devices, remove all the tokens", async () => {
+    await request(app)
+      .post(`${API_PREFIX}/logoutAll`)
+      .set("Authorization", `Bearer ${testUserOne.tokens[0]}`)
+      .expect(200);
+
+    const loggedOutUser = await User.findById(testUserOneId);
+
+    // All the tokens removed from database
+    expect(loggedOutUser.tokens).toEqual([]);
+  });
+});
+
+describe("[get user information]", () => {
+  it("[success] Should return user's information", async () => {
+    const response = await request(app)
+      .get(`${API_PREFIX}/me`)
+      .set("Authorization", `Bearer ${testUserOne.tokens[0]}`)
+      .expect(200);
+
+    expect(response.body.data).toMatchObject({
+      email: testUserOne.email,
+      _id: testUserOne._id,
+      name: testUserOne.name,
+    });
   });
 });
