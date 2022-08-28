@@ -133,4 +133,91 @@ describe("[get user information]", () => {
       name: testUserOne.name,
     });
   });
+
+  it("[fail] Should fails if user unauthorized", async () => {
+    await request(app).get(`${API_PREFIX}/me`).send().expect(401);
+  });
+});
+
+describe("[reset user password]", () => {
+  it("[success] Should reset user's password and return new password", async () => {
+    const response = await request(app)
+      .post(`${API_PREFIX}/password/reset`)
+      .send({
+        email: testUserOne.email,
+      })
+      .expect(200);
+
+    expect(response.body.data).toBeTruthy();
+
+    await request(app)
+      .post(`${API_PREFIX}/login`)
+      .send({
+        email: testUserOne.email,
+        password: testUserOne.password,
+      })
+      .expect(401);
+
+    await request(app)
+      .post(`${API_PREFIX}/login`)
+      .send({
+        email: testUserOne.email,
+        password: response.body.data,
+      })
+      .expect(200);
+  });
+});
+
+describe("[change user password]", () => {
+  it("[success] should change user's password", async () => {
+    const newPassword = "testOnetestOneNew!";
+
+    await request(app)
+      .post(`${API_PREFIX}/password/change`)
+      .send({
+        oldPassword: testUserOne.password, newPassword, newPasswordCopy: newPassword,
+      })
+      .set("Authorization", `Bearer ${testUserOne.tokens[0]}`)
+      .expect(200);
+
+    await request(app)
+      .post(`${API_PREFIX}/login`)
+      .send({
+        email: testUserOne.email,
+        password: testUserOne.password,
+      })
+      .expect(401);
+
+    await request(app)
+      .post(`${API_PREFIX}/login`)
+      .send({
+        email: testUserOne.email,
+        password: newPassword,
+      })
+      .expect(200);
+  });
+
+  it("[fail] should fail if old password don't match", async () => {
+    const newPassword = "testOnetestOneNew!";
+
+    await request(app)
+      .post(`${API_PREFIX}/password/change`)
+      .send({
+        oldPassword: "wrongOldPassword", newPassword, newPasswordCopy: newPassword,
+      })
+      .set("Authorization", `Bearer ${testUserOne.tokens[0]}`)
+      .expect(401);
+  });
+
+  it("[fail] should fail if newPassword and newPasswordCopy don't match", async () => {
+    const newPassword = "testOnetestOneNew!";
+
+    await request(app)
+      .post(`${API_PREFIX}/password/change`)
+      .send({
+        oldPassword: "wrongOldPassword", newPassword, newPasswordCopy: "anotherPassword",
+      })
+      .set("Authorization", `Bearer ${testUserOne.tokens[0]}`)
+      .expect(401);
+  });
 });

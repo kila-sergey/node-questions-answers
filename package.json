@@ -9,7 +9,7 @@
     "dev": "NODE_ENV=development nodemon --experimental-modules --es-module-specifier-resolution=node src/index.js",
     "prod": "NODE_ENV=production node --experimental-modules --es-module-specifier-resolution=node src/index.js",
     "lint": "eslint --ext .js src/* --fix",
-    "test": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./test.env jest --setupFiles=dotenv/config"
+    "test": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./test.env jest --setupFiles=dotenv/config --runInBand"
   },
   "jest": {
     "testEnvironment": "node"
